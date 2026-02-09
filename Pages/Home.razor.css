@@ -48,6 +48,11 @@
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
 }
 
+.game-card-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .game-preview {
     width: 100%;
     height: 200px;
@@ -122,10 +127,6 @@
 }
 
 /* Color variations for different games */
-.game-card:nth-child(1) .game-preview {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
 .game-card:nth-child(2) .game-preview {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
