@@ -2,11 +2,9 @@
 
 <PageTitle>Mayın Tarlası</PageTitle>
 
-<h1>Mayın Tarlası</h1>
-
-<p>10x10 tabloda mayınları bul. Boş hücreleri aç, bayrak ile işaretle.</p>
-
 <div class="minesweeper-game">
+    <h1 class="minesweeper-title">Mayın Tarlası</h1>
+
     <div class="minesweeper-info">
         <span>Mayın: @MineCount</span>
         <span>Kalan Bayrak: @(MineCount - flaggedCount)</span>
@@ -48,7 +46,12 @@
         }
     </div>
 
-    <p class="minesweeper-hint">Aç: Tıkla veya Boşluk, Bayrak: Sağ Tık veya F</p>
+    <div class="minesweeper-controls">
+        <p><strong>Kontroller:</strong></p>
+        <p>Tıkla / Boşluk - Hücreyi Aç</p>
+        <p>Sağ Tık / F - Bayrak Koy</p>
+        <p>Ok Tuşları - Hareket</p>
+    </div>
 </div>
 
 @code {

@@ -3,11 +3,9 @@
 
 <PageTitle>Tetris</PageTitle>
 
-<h1>Tetris</h1>
-
-<p>10x20 tabloda blokları düşürün. Ok tuşlarıyla veya WASD ile hareket edin, yukarı ile döndürün.</p>
-
 <div class="tetris-game">
+    <h1 class="tetris-title">Tetris</h1>
+
     <div class="tetris-info">
         <span>Tamamlanan Satırlar: @linesCleared</span>
     </div>
@@ -40,7 +38,13 @@
         }
     </div>
 
-    <p class="tetris-hint">Hareket: ← → ↓ veya A S D, Döndür: ↑ veya W</p>
+    <div class="tetris-controls">
+        <p><strong>Kontroller:</strong></p>
+        <p>← / A - Sol</p>
+        <p>→ / D - Sağ</p>
+        <p>↓ / S - Aşağı</p>
+        <p>↑ / W - Döndür</p>
+    </div>
 </div>
 
 @code {

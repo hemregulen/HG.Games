@@ -1,8 +1,11 @@
 ﻿.minesweeper-game {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 1rem;
     max-width: 420px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
 }
 
 .minesweeper-info {
@@ -76,6 +79,17 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
-.minesweeper-hint {
+.minesweeper-title {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.minesweeper-controls {
+    text-align: center;
     color: #6c757d;
+    margin-top: 1rem;
+}
+
+.minesweeper-controls p {
+    margin: 0.25rem 0;
 }
