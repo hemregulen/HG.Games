@@ -5,11 +5,11 @@
 
 <h1>Tetris</h1>
 
-<p>10x20 tabloda blokları düşürün. Ok tuşlarıyla hareket ettirin, yukarı ile döndürün.</p>
+<p>10x20 tabloda blokları düşürün. Ok tuşlarıyla veya WASD ile hareket edin, yukarı ile döndürün.</p>
 
 <div class="tetris-game">
     <div class="tetris-info">
-        <span>Tamamlanan Satır: @linesCleared</span>
+        <span>Tamamlanan Satırlar: @linesCleared</span>
     </div>
 
     <div class="tetris-board-wrapper">
@@ -40,13 +40,14 @@
         }
     </div>
 
-    <p class="tetris-hint">Hareket: ← → ↓, Döndür: ↑ veya W</p>
+    <p class="tetris-hint">Hareket: ← → ↓ veya A S D, Döndür: ↑ veya W</p>
 </div>
 
 @code {
     private const int BoardWidth = 10;
     private const int BoardHeight = 20;
     private static readonly TimeSpan DropInterval = TimeSpan.FromMilliseconds(450);
+    private const int SpawnCenterOffset = 2;
     private static readonly TetrominoType[] TetrominoOrder = Enum.GetValues<TetrominoType>();
     private static readonly Dictionary<TetrominoType, Cell[][]> Tetrominoes = new()
     {
@@ -173,7 +174,7 @@
     private void SpawnNewPiece()
     {
         var nextType = TetrominoOrder[random.Next(TetrominoOrder.Length)];
-        currentPiece = new Tetromino(nextType, 0, new Cell(BoardWidth / 2 - 2, 0));
+        currentPiece = new Tetromino(nextType, 0, new Cell(BoardWidth / 2 - SpawnCenterOffset, 0));
         if (!CanPlace(GetCells(currentPiece)))
         {
             EndGame("Yeni bloklar sığmıyor.");
@@ -193,7 +194,8 @@
 
     private void ClearFullLines()
     {
-        for (var y = BoardHeight - 1; y >= 0; y--)
+        var y = BoardHeight - 1;
+        while (y >= 0)
         {
             var rowFull = true;
             for (var x = 0; x < BoardWidth; x++)
@@ -207,6 +209,7 @@
 
             if (!rowFull)
             {
+                y--;
                 continue;
             }
 
@@ -224,7 +227,6 @@
             }
 
             linesCleared++;
-            y++;
         }
     }
 
