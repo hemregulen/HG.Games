@@ -3,11 +3,9 @@
 
 <PageTitle>Yılan Oyunu</PageTitle>
 
-<h1>Yılan Oyunu</h1>
-
-<p>30x30 tabloda yılanı W A S D tuşlarıyla hareket ettirin. Solucan yedikçe yılan büyür.</p>
-
 <div class="snake-game">
+    <h1 class="snake-title">Yılan Oyunu</h1>
+
     <div class="snake-info">
         <span>Uzunluk: @snake.Count</span>
     </div>
@@ -40,7 +38,13 @@
         }
     </div>
 
-    <p class="snake-hint">Hareket: W A S D</p>
+    <div class="snake-controls">
+        <p><strong>Kontroller:</strong></p>
+        <p>W - Yukarı</p>
+        <p>A - Sol</p>
+        <p>S - Aşağı</p>
+        <p>D - Sağ</p>
+    </div>
 </div>
 
 @code {
