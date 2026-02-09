@@ -49,9 +49,7 @@ Klasik mayın tarlası oyunu.
 HG.Games/
 ├── Layout/
 │   ├── MainLayout.razor          # Ana sayfa düzeni
-│   ├── MainLayout.razor.css      # Düzen stilleri
-│   ├── NavMenu.razor             # Navigasyon menüsü (kullanılmıyor)
-│   └── NavMenu.razor.css         # Menü stilleri
+│   └── MainLayout.razor.css      # Düzen stilleri
 ├── Pages/
 │   ├── Home.razor                # Ana sayfa - Oyun listesi
 │   ├── Snake.razor               # Yılan oyunu
