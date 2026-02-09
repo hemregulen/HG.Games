@@ -1,19 +1,94 @@
 ﻿@page "/"
 
-<PageTitle>Oyunlar</PageTitle>
+<PageTitle>kebab.games - Eğlenceli Oyunlar</PageTitle>
 
-<h1>Oyunlar</h1>
+<div class="games-container">
+    <div class="logo-section">
+        <h1 class="logo-title">🥙 kebab.games</h1>
+        <p class="logo-subtitle">Lezzetli Oyunlar, Sınırsız Eğlence!</p>
+    </div>
 
-<p>HG.Games içinde zamanla farklı oyunlar olacak. İlk oyunumuz yılan.</p>
+    <div class="games-grid">
+        <!-- Row 1 -->
+        <a href="/snake" class="game-card">
+            <div class="game-preview">
+                <span class="game-preview-placeholder">🐍</span>
+            </div>
+            <div class="game-info">
+                <h2 class="game-name">Yılan Oyunu</h2>
+                <p class="game-description">Klasik yılan oyunu</p>
+            </div>
+        </a>
 
-<ul>
-    <li>
-        <NavLink href="snake">Yılan Oyunu</NavLink>
-    </li>
-    <li>
-        <NavLink href="tetris">Tetris</NavLink>
-    </li>
-    <li>
-        <NavLink href="mayin-tarlasi">Mayın Tarlası</NavLink>
-    </li>
-</ul>
+        <a href="/tetris" class="game-card">
+            <div class="game-preview">
+                <span class="game-preview-placeholder">🧱</span>
+            </div>
+            <div class="game-info">
+                <h2 class="game-name">Tetris</h2>
+                <p class="game-description">Blokları yerleştir</p>
+            </div>
+        </a>
+
+        <a href="/mayin-tarlasi" class="game-card">
+            <div class="game-preview">
+                <span class="game-preview-placeholder">💣</span>
+            </div>
+            <div class="game-info">
+                <h2 class="game-name">Mayın Tarlası</h2>
+                <p class="game-description">Mayınları bul</p>
+            </div>
+        </a>
+
+        <div class="game-card game-card-disabled">
+            <div class="game-preview">
+                <span class="game-preview-placeholder">🎮</span>
+            </div>
+            <div class="game-info">
+                <h2 class="game-name">Yakında</h2>
+                <p class="game-description">Yeni oyun geliyor</p>
+            </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="game-card game-card-disabled">
+            <div class="game-preview">
+                <span class="game-preview-placeholder">🎯</span>
+            </div>
+            <div class="game-info">
+                <h2 class="game-name">Yakında</h2>
+                <p class="game-description">Yeni oyun geliyor</p>
+            </div>
+        </div>
+
+        <div class="game-card game-card-disabled">
+            <div class="game-preview">
+                <span class="game-preview-placeholder">🎲</span>
+            </div>
+            <div class="game-info">
+                <h2 class="game-name">Yakında</h2>
+                <p class="game-description">Yeni oyun geliyor</p>
+            </div>
+        </div>
+
+        <div class="game-card game-card-disabled">
+            <div class="game-preview">
+                <span class="game-preview-placeholder">🃏</span>
+            </div>
+            <div class="game-info">
+                <h2 class="game-name">Yakında</h2>
+                <p class="game-description">Yeni oyun geliyor</p>
+            </div>
+        </div>
+
+        <div class="game-card game-card-disabled">
+            <div class="game-preview">
+                <span class="game-preview-placeholder">🎪</span>
+            </div>
+            <div class="game-info">
+                <h2 class="game-name">Yakında</h2>
+                <p class="game-description">Yeni oyun geliyor</p>
+            </div>
+        </div>
+    </div>
+</div>
