@@ -1,0 +1,371 @@
+﻿@page "/tetris"
+@implements IDisposable
+
+<PageTitle>Tetris</PageTitle>
+
+<h1>Tetris</h1>
+
+<p>10x20 tabloda blokları düşürün. Ok tuşlarıyla hareket ettirin, yukarı ile döndürün.</p>
+
+<div class="tetris-game">
+    <div class="tetris-info">
+        <span>Tamamlanan Satır: @linesCleared</span>
+    </div>
+
+    <div class="tetris-board-wrapper">
+        <div class="tetris-board"
+             tabindex="0"
+             aria-label="Tetris oyun alanı"
+             @onkeydown="HandleKeyDown"
+             @onkeydown:preventDefault="true"
+             @ref="boardRef">
+            @for (var y = 0; y < BoardHeight; y++)
+            {
+                @for (var x = 0; x < BoardWidth; x++)
+                {
+                    <div class="@GetCellClass(x, y)"></div>
+                }
+            }
+        </div>
+
+        @if (isGameOver)
+        {
+            <div class="tetris-overlay">
+                <div class="tetris-overlay-content">
+                    <h2>Oyun Bitti</h2>
+                    <p>@gameOverMessage</p>
+                    <button class="btn btn-primary" @onclick="StartNewGame">Yeniden Başla</button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <p class="tetris-hint">Hareket: ← → ↓, Döndür: ↑ veya W</p>
+</div>
+
+@code {
+    private const int BoardWidth = 10;
+    private const int BoardHeight = 20;
+    private static readonly TimeSpan DropInterval = TimeSpan.FromMilliseconds(450);
+    private static readonly TetrominoType[] TetrominoOrder = Enum.GetValues<TetrominoType>();
+    private static readonly Dictionary<TetrominoType, Cell[][]> Tetrominoes = new()
+    {
+        [TetrominoType.I] = new[]
+        {
+            new[] { new Cell(0, 1), new Cell(1, 1), new Cell(2, 1), new Cell(3, 1) },
+            new[] { new Cell(2, 0), new Cell(2, 1), new Cell(2, 2), new Cell(2, 3) },
+            new[] { new Cell(0, 2), new Cell(1, 2), new Cell(2, 2), new Cell(3, 2) },
+            new[] { new Cell(1, 0), new Cell(1, 1), new Cell(1, 2), new Cell(1, 3) }
+        },
+        [TetrominoType.O] = new[]
+        {
+            new[] { new Cell(1, 0), new Cell(2, 0), new Cell(1, 1), new Cell(2, 1) },
+            new[] { new Cell(1, 0), new Cell(2, 0), new Cell(1, 1), new Cell(2, 1) },
+            new[] { new Cell(1, 0), new Cell(2, 0), new Cell(1, 1), new Cell(2, 1) },
+            new[] { new Cell(1, 0), new Cell(2, 0), new Cell(1, 1), new Cell(2, 1) }
+        },
+        [TetrominoType.T] = new[]
+        {
+            new[] { new Cell(1, 0), new Cell(0, 1), new Cell(1, 1), new Cell(2, 1) },
+            new[] { new Cell(1, 0), new Cell(1, 1), new Cell(2, 1), new Cell(1, 2) },
+            new[] { new Cell(0, 1), new Cell(1, 1), new Cell(2, 1), new Cell(1, 2) },
+            new[] { new Cell(1, 0), new Cell(0, 1), new Cell(1, 1), new Cell(1, 2) }
+        },
+        [TetrominoType.S] = new[]
+        {
+            new[] { new Cell(1, 0), new Cell(2, 0), new Cell(0, 1), new Cell(1, 1) },
+            new[] { new Cell(1, 0), new Cell(1, 1), new Cell(2, 1), new Cell(2, 2) },
+            new[] { new Cell(1, 1), new Cell(2, 1), new Cell(0, 2), new Cell(1, 2) },
+            new[] { new Cell(0, 0), new Cell(0, 1), new Cell(1, 1), new Cell(1, 2) }
+        },
+        [TetrominoType.Z] = new[]
+        {
+            new[] { new Cell(0, 0), new Cell(1, 0), new Cell(1, 1), new Cell(2, 1) },
+            new[] { new Cell(2, 0), new Cell(1, 1), new Cell(2, 1), new Cell(1, 2) },
+            new[] { new Cell(0, 1), new Cell(1, 1), new Cell(1, 2), new Cell(2, 2) },
+            new[] { new Cell(1, 0), new Cell(0, 1), new Cell(1, 1), new Cell(0, 2) }
+        },
+        [TetrominoType.J] = new[]
+        {
+            new[] { new Cell(0, 0), new Cell(0, 1), new Cell(1, 1), new Cell(2, 1) },
+            new[] { new Cell(1, 0), new Cell(2, 0), new Cell(1, 1), new Cell(1, 2) },
+            new[] { new Cell(0, 1), new Cell(1, 1), new Cell(2, 1), new Cell(2, 2) },
+            new[] { new Cell(1, 0), new Cell(1, 1), new Cell(0, 2), new Cell(1, 2) }
+        },
+        [TetrominoType.L] = new[]
+        {
+            new[] { new Cell(2, 0), new Cell(0, 1), new Cell(1, 1), new Cell(2, 1) },
+            new[] { new Cell(1, 0), new Cell(1, 1), new Cell(1, 2), new Cell(2, 2) },
+            new[] { new Cell(0, 1), new Cell(1, 1), new Cell(2, 1), new Cell(0, 2) },
+            new[] { new Cell(0, 0), new Cell(1, 0), new Cell(1, 1), new Cell(1, 2) }
+        }
+    };
+
+    private readonly Random random = new();
+    private TetrominoType?[,] board = new TetrominoType?[BoardHeight, BoardWidth];
+    private Tetromino currentPiece;
+    private int linesCleared;
+    private bool isGameOver;
+    private string gameOverMessage = string.Empty;
+    private CancellationTokenSource? gameLoopCts;
+    private ElementReference boardRef;
+    private bool shouldFocusBoard = true;
+
+    protected override void OnInitialized()
+    {
+        StartNewGame();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (shouldFocusBoard)
+        {
+            shouldFocusBoard = false;
+            await boardRef.FocusAsync();
+        }
+    }
+
+    private void StartNewGame()
+    {
+        board = new TetrominoType?[BoardHeight, BoardWidth];
+        linesCleared = 0;
+        isGameOver = false;
+        gameOverMessage = string.Empty;
+        SpawnNewPiece();
+        StartGameLoop();
+        shouldFocusBoard = true;
+    }
+
+    private void StartGameLoop()
+    {
+        gameLoopCts?.Cancel();
+        gameLoopCts?.Dispose();
+        gameLoopCts = new CancellationTokenSource();
+        _ = RunGameLoopAsync(gameLoopCts.Token);
+    }
+
+    private async Task RunGameLoopAsync(CancellationToken token)
+    {
+        using var timer = new PeriodicTimer(DropInterval);
+        while (await timer.WaitForNextTickAsync(token))
+        {
+            await InvokeAsync(() =>
+            {
+                if (!isGameOver)
+                {
+                    DropPiece();
+                    StateHasChanged();
+                }
+            });
+        }
+    }
+
+    private void DropPiece()
+    {
+        if (!TryMove(0, 1))
+        {
+            LockPiece();
+            ClearFullLines();
+            SpawnNewPiece();
+        }
+    }
+
+    private void SpawnNewPiece()
+    {
+        var nextType = TetrominoOrder[random.Next(TetrominoOrder.Length)];
+        currentPiece = new Tetromino(nextType, 0, new Cell(BoardWidth / 2 - 2, 0));
+        if (!CanPlace(GetCells(currentPiece)))
+        {
+            EndGame("Yeni bloklar sığmıyor.");
+        }
+    }
+
+    private void LockPiece()
+    {
+        foreach (var cell in GetCells(currentPiece))
+        {
+            if (cell.Y >= 0 && cell.Y < BoardHeight && cell.X >= 0 && cell.X < BoardWidth)
+            {
+                board[cell.Y, cell.X] = currentPiece.Type;
+            }
+        }
+    }
+
+    private void ClearFullLines()
+    {
+        for (var y = BoardHeight - 1; y >= 0; y--)
+        {
+            var rowFull = true;
+            for (var x = 0; x < BoardWidth; x++)
+            {
+                if (board[y, x] is null)
+                {
+                    rowFull = false;
+                    break;
+                }
+            }
+
+            if (!rowFull)
+            {
+                continue;
+            }
+
+            for (var yy = y; yy > 0; yy--)
+            {
+                for (var x = 0; x < BoardWidth; x++)
+                {
+                    board[yy, x] = board[yy - 1, x];
+                }
+            }
+
+            for (var x = 0; x < BoardWidth; x++)
+            {
+                board[0, x] = null;
+            }
+
+            linesCleared++;
+            y++;
+        }
+    }
+
+    private bool TryMove(int dx, int dy)
+    {
+        var nextCells = GetCells(currentPiece, dx, dy);
+        if (!CanPlace(nextCells))
+        {
+            return false;
+        }
+
+        currentPiece = currentPiece with { Position = new Cell(currentPiece.Position.X + dx, currentPiece.Position.Y + dy) };
+        return true;
+    }
+
+    private void RotatePiece()
+    {
+        var rotationCount = Tetrominoes[currentPiece.Type].Length;
+        var nextRotation = (currentPiece.Rotation + 1) % rotationCount;
+        var nextCells = GetCells(currentPiece, rotation: nextRotation);
+        if (CanPlace(nextCells))
+        {
+            currentPiece = currentPiece with { Rotation = nextRotation };
+        }
+    }
+
+    private bool CanPlace(IEnumerable<Cell> cells)
+    {
+        foreach (var cell in cells)
+        {
+            if (cell.X < 0 || cell.X >= BoardWidth || cell.Y < 0 || cell.Y >= BoardHeight)
+            {
+                return false;
+            }
+
+            if (board[cell.Y, cell.X] is not null)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private IEnumerable<Cell> GetCells(Tetromino piece, int offsetX = 0, int offsetY = 0, int? rotation = null)
+    {
+        var rotationIndex = rotation ?? piece.Rotation;
+        foreach (var cell in Tetrominoes[piece.Type][rotationIndex])
+        {
+            yield return new Cell(cell.X + piece.Position.X + offsetX, cell.Y + piece.Position.Y + offsetY);
+        }
+    }
+
+    private string GetCellClass(int x, int y)
+    {
+        var cell = new Cell(x, y);
+        var type = GetCurrentCellType(cell) ?? board[y, x];
+        return type is null ? "tetris-cell" : $"tetris-cell {GetTypeClass(type.Value)}";
+    }
+
+    private TetrominoType? GetCurrentCellType(Cell cell)
+    {
+        foreach (var pieceCell in GetCells(currentPiece))
+        {
+            if (pieceCell.Equals(cell))
+            {
+                return currentPiece.Type;
+            }
+        }
+
+        return null;
+    }
+
+    private static string GetTypeClass(TetrominoType type)
+    {
+        return type switch
+        {
+            TetrominoType.I => "tetris-i",
+            TetrominoType.O => "tetris-o",
+            TetrominoType.T => "tetris-t",
+            TetrominoType.S => "tetris-s",
+            TetrominoType.Z => "tetris-z",
+            TetrominoType.J => "tetris-j",
+            _ => "tetris-l"
+        };
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs args)
+    {
+        if (isGameOver)
+        {
+            return;
+        }
+
+        var key = args.Key?.ToLowerInvariant();
+        switch (key)
+        {
+            case "arrowleft":
+            case "a":
+                TryMove(-1, 0);
+                break;
+            case "arrowright":
+            case "d":
+                TryMove(1, 0);
+                break;
+            case "arrowdown":
+            case "s":
+                TryMove(0, 1);
+                break;
+            case "arrowup":
+            case "w":
+                RotatePiece();
+                break;
+        }
+    }
+
+    private void EndGame(string message)
+    {
+        isGameOver = true;
+        gameOverMessage = message;
+        gameLoopCts?.Cancel();
+    }
+
+    public void Dispose()
+    {
+        gameLoopCts?.Cancel();
+        gameLoopCts?.Dispose();
+    }
+
+    private readonly record struct Cell(int X, int Y);
+
+    private readonly record struct Tetromino(TetrominoType Type, int Rotation, Cell Position);
+
+    private enum TetrominoType
+    {
+        I,
+        O,
+        T,
+        S,
+        Z,
+        J,
+        L
+    }
+}
