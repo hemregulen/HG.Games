@@ -1,0 +1,252 @@
+﻿@page "/snake"
+@implements IDisposable
+
+<PageTitle>Yılan Oyunu</PageTitle>
+
+<h1>Yılan Oyunu</h1>
+
+<p>30x30 tabloda yılanı W A S D tuşlarıyla hareket ettirin. Solucan yedikçe büyürsünüz.</p>
+
+<div class="snake-game">
+    <div class="snake-info">
+        <span>Uzunluk: @snake.Count</span>
+    </div>
+
+    <div class="snake-board-wrapper">
+        <div class="snake-board"
+             tabindex="0"
+             aria-label="Yılan oyun alanı"
+             @onkeydown="HandleKeyDown"
+             @onkeydown:preventDefault="true"
+             @ref="boardRef">
+            @for (var y = 0; y < BoardSize; y++)
+            {
+                @for (var x = 0; x < BoardSize; x++)
+                {
+                    <div class="snake-cell @GetCellClass(x, y)"></div>
+                }
+            }
+        </div>
+
+        @if (isGameOver)
+        {
+            <div class="snake-overlay">
+                <div class="snake-overlay-content">
+                    <h2>Oyun Bitti</h2>
+                    <p>@gameOverMessage</p>
+                    <button class="btn btn-primary" @onclick="RestartGame">Yeniden Başla</button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <p class="snake-hint">Hareket: W A S D</p>
+</div>
+
+@code {
+    private const int BoardSize = 30;
+    private static readonly TimeSpan MoveInterval = TimeSpan.FromMilliseconds(180);
+    private readonly Random random = new();
+    private readonly HashSet<Cell> snakeCells = new();
+
+    private List<Cell> snake = new();
+    private Cell food;
+    private Direction currentDirection = Direction.Right;
+    private Direction pendingDirection = Direction.Right;
+    private bool isGameOver;
+    private string gameOverMessage = string.Empty;
+    private ElementReference boardRef;
+    private CancellationTokenSource? gameLoopCts;
+    private bool shouldFocusBoard = true;
+
+    protected override void OnInitialized()
+    {
+        StartNewGame();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (shouldFocusBoard)
+        {
+            shouldFocusBoard = false;
+            await boardRef.FocusAsync();
+        }
+    }
+
+    private void StartNewGame()
+    {
+        snake = new List<Cell>
+        {
+            new(15, 15),
+            new(14, 15),
+            new(13, 15)
+        };
+
+        snakeCells.Clear();
+        foreach (var segment in snake)
+        {
+            snakeCells.Add(segment);
+        }
+
+        currentDirection = Direction.Right;
+        pendingDirection = Direction.Right;
+        isGameOver = false;
+        gameOverMessage = string.Empty;
+        PlaceFood();
+        StartGameLoop();
+        shouldFocusBoard = true;
+    }
+
+    private void StartGameLoop()
+    {
+        gameLoopCts?.Cancel();
+        gameLoopCts?.Dispose();
+        gameLoopCts = new CancellationTokenSource();
+        _ = RunGameLoopAsync(gameLoopCts.Token);
+    }
+
+    private async Task RunGameLoopAsync(CancellationToken token)
+    {
+        using var timer = new PeriodicTimer(MoveInterval);
+        while (await timer.WaitForNextTickAsync(token))
+        {
+            await InvokeAsync(() =>
+            {
+                if (!isGameOver)
+                {
+                    MoveSnake();
+                    StateHasChanged();
+                }
+            });
+        }
+    }
+
+    private void MoveSnake()
+    {
+        currentDirection = pendingDirection;
+        var head = snake[0];
+        var nextHead = currentDirection switch
+        {
+            Direction.Up => head with { Y = head.Y - 1 },
+            Direction.Down => head with { Y = head.Y + 1 },
+            Direction.Left => head with { X = head.X - 1 },
+            _ => head with { X = head.X + 1 }
+        };
+
+        if (nextHead.X < 0 || nextHead.X >= BoardSize || nextHead.Y < 0 || nextHead.Y >= BoardSize)
+        {
+            EndGame("Duvara çarptın.");
+            return;
+        }
+
+        if (snakeCells.Contains(nextHead))
+        {
+            EndGame("Kendine çarptın.");
+            return;
+        }
+
+        snake.Insert(0, nextHead);
+        snakeCells.Add(nextHead);
+
+        if (nextHead.Equals(food))
+        {
+            PlaceFood();
+            return;
+        }
+
+        var tail = snake[^1];
+        snake.RemoveAt(snake.Count - 1);
+        snakeCells.Remove(tail);
+    }
+
+    private void EndGame(string message)
+    {
+        isGameOver = true;
+        gameOverMessage = message;
+    }
+
+    private void PlaceFood()
+    {
+        if (snake.Count >= BoardSize * BoardSize)
+        {
+            EndGame("Tüm alanı doldurdun!");
+            return;
+        }
+
+        Cell nextFood;
+        do
+        {
+            nextFood = new Cell(random.Next(BoardSize), random.Next(BoardSize));
+        } while (snakeCells.Contains(nextFood));
+
+        food = nextFood;
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs args)
+    {
+        if (isGameOver)
+        {
+            return;
+        }
+
+        var key = args.Key?.ToLowerInvariant();
+        var nextDirection = key switch
+        {
+            "w" => Direction.Up,
+            "s" => Direction.Down,
+            "a" => Direction.Left,
+            "d" => Direction.Right,
+            _ => pendingDirection
+        };
+
+        if (!IsOppositeDirection(currentDirection, nextDirection))
+        {
+            pendingDirection = nextDirection;
+        }
+    }
+
+    private static bool IsOppositeDirection(Direction current, Direction next)
+    {
+        return (current == Direction.Up && next == Direction.Down)
+            || (current == Direction.Down && next == Direction.Up)
+            || (current == Direction.Left && next == Direction.Right)
+            || (current == Direction.Right && next == Direction.Left);
+    }
+
+    private string GetCellClass(int x, int y)
+    {
+        var cell = new Cell(x, y);
+        if (cell.Equals(snake[0]))
+        {
+            return "snake-head";
+        }
+
+        if (cell.Equals(food))
+        {
+            return "food";
+        }
+
+        return snakeCells.Contains(cell) ? "snake" : string.Empty;
+    }
+
+    private void RestartGame()
+    {
+        StartNewGame();
+    }
+
+    public void Dispose()
+    {
+        gameLoopCts?.Cancel();
+        gameLoopCts?.Dispose();
+    }
+
+    private readonly record struct Cell(int X, int Y);
+
+    private enum Direction
+    {
+        Up,
+        Down,
+        Left,
+        Right
+    }
+}
