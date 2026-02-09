@@ -1,0 +1,398 @@
+﻿@page "/mayin-tarlasi"
+
+<PageTitle>Mayın Tarlası</PageTitle>
+
+<h1>Mayın Tarlası</h1>
+
+<p>10x10 tabloda mayınları bul. Boş hücreleri aç, bayrak ile işaretle.</p>
+
+<div class="minesweeper-game">
+    <div class="minesweeper-info">
+        <span>Mayın: @MineCount</span>
+        <span>Kalan Bayrak: @(MineCount - flaggedCount)</span>
+    </div>
+
+    <div class="minesweeper-board-wrapper">
+        <div class="minesweeper-board"
+             tabindex="0"
+             aria-label="Mayın tarlası oyun alanı"
+             @onkeydown="HandleKeyDown"
+             @onkeydown:preventDefault="true"
+             @ref="boardRef">
+            @for (var y = 0; y < BoardHeight; y++)
+            {
+                @for (var x = 0; x < BoardWidth; x++)
+                {
+                    var cell = board[y, x];
+                    <button type="button"
+                            class="@GetCellClass(cell, x, y)"
+                            @onclick="() => HandleCellClick(x, y)"
+                            @oncontextmenu="() => HandleCellFlag(x, y)"
+                            @oncontextmenu:preventDefault="true"
+                            disabled="@(isGameOver || isWin)">
+                        @GetCellContent(cell)
+                    </button>
+                }
+            }
+        </div>
+
+        @if (isGameOver || isWin)
+        {
+            <div class="minesweeper-overlay">
+                <div class="minesweeper-overlay-content">
+                    <h2>@(isWin ? "Kazandın" : "Oyun Bitti")</h2>
+                    <p>@gameOverMessage</p>
+                    <button class="btn btn-primary" @onclick="StartNewGame">Yeniden Başla</button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <p class="minesweeper-hint">Aç: Tıkla veya Boşluk, Bayrak: Sağ Tık veya F</p>
+</div>
+
+@code {
+    private const int BoardWidth = 10;
+    private const int BoardHeight = 10;
+    private const int MineCount = 12;
+
+    private readonly Random random = new();
+    private Cell[,] board = new Cell[BoardHeight, BoardWidth];
+    private bool isGameOver;
+    private bool isWin;
+    private bool isFirstMove = true;
+    private int flaggedCount;
+    private string gameOverMessage = string.Empty;
+    private ElementReference boardRef;
+    private bool shouldFocusBoard = true;
+    private int selectedX;
+    private int selectedY;
+
+    protected override void OnInitialized()
+    {
+        StartNewGame();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (shouldFocusBoard)
+        {
+            shouldFocusBoard = false;
+            await boardRef.FocusAsync();
+        }
+    }
+
+    private void StartNewGame()
+    {
+        board = new Cell[BoardHeight, BoardWidth];
+        for (var y = 0; y < BoardHeight; y++)
+        {
+            for (var x = 0; x < BoardWidth; x++)
+            {
+                board[y, x] = new Cell();
+            }
+        }
+
+        isGameOver = false;
+        isWin = false;
+        isFirstMove = true;
+        flaggedCount = 0;
+        gameOverMessage = string.Empty;
+        selectedX = 0;
+        selectedY = 0;
+        shouldFocusBoard = true;
+    }
+
+    private void PlaceMines(int safeX, int safeY)
+    {
+        var placed = 0;
+        while (placed < MineCount)
+        {
+            var x = random.Next(BoardWidth);
+            var y = random.Next(BoardHeight);
+            if ((x == safeX && y == safeY) || board[y, x].IsMine)
+            {
+                continue;
+            }
+
+            board[y, x].IsMine = true;
+            placed++;
+        }
+
+        for (var y = 0; y < BoardHeight; y++)
+        {
+            for (var x = 0; x < BoardWidth; x++)
+            {
+                if (!board[y, x].IsMine)
+                {
+                    board[y, x].AdjacentMines = CountAdjacentMines(x, y);
+                }
+            }
+        }
+    }
+
+    private int CountAdjacentMines(int x, int y)
+    {
+        var count = 0;
+        for (var dy = -1; dy <= 1; dy++)
+        {
+            for (var dx = -1; dx <= 1; dx++)
+            {
+                if (dx == 0 && dy == 0)
+                {
+                    continue;
+                }
+
+                var nx = x + dx;
+                var ny = y + dy;
+                if (nx < 0 || nx >= BoardWidth || ny < 0 || ny >= BoardHeight)
+                {
+                    continue;
+                }
+
+                if (board[ny, nx].IsMine)
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    private void HandleCellClick(int x, int y)
+    {
+        selectedX = x;
+        selectedY = y;
+        RevealCell(x, y);
+    }
+
+    private void HandleCellFlag(int x, int y)
+    {
+        selectedX = x;
+        selectedY = y;
+        ToggleFlag(x, y);
+    }
+
+    private void RevealCell(int x, int y)
+    {
+        if (isGameOver || isWin)
+        {
+            return;
+        }
+
+        var cell = board[y, x];
+        if (cell.IsRevealed || cell.IsFlagged)
+        {
+            return;
+        }
+
+        if (isFirstMove)
+        {
+            PlaceMines(x, y);
+            isFirstMove = false;
+        }
+
+        if (cell.IsMine)
+        {
+            cell.IsRevealed = true;
+            RevealAllMines();
+            EndGame("Mayına bastın.");
+            return;
+        }
+
+        FloodReveal(x, y);
+        CheckWin();
+    }
+
+    private void FloodReveal(int x, int y)
+    {
+        var queue = new Queue<(int X, int Y)>();
+        queue.Enqueue((x, y));
+
+        while (queue.Count > 0)
+        {
+            var (cx, cy) = queue.Dequeue();
+            var current = board[cy, cx];
+            if (current.IsRevealed || current.IsFlagged)
+            {
+                continue;
+            }
+
+            current.IsRevealed = true;
+            if (current.AdjacentMines != 0)
+            {
+                continue;
+            }
+
+            for (var dy = -1; dy <= 1; dy++)
+            {
+                for (var dx = -1; dx <= 1; dx++)
+                {
+                    if (dx == 0 && dy == 0)
+                    {
+                        continue;
+                    }
+
+                    var nx = cx + dx;
+                    var ny = cy + dy;
+                    if (nx < 0 || nx >= BoardWidth || ny < 0 || ny >= BoardHeight)
+                    {
+                        continue;
+                    }
+
+                    var neighbor = board[ny, nx];
+                    if (!neighbor.IsMine && !neighbor.IsRevealed)
+                    {
+                        queue.Enqueue((nx, ny));
+                    }
+                }
+            }
+        }
+    }
+
+    private void ToggleFlag(int x, int y)
+    {
+        if (isGameOver || isWin)
+        {
+            return;
+        }
+
+        var cell = board[y, x];
+        if (cell.IsRevealed)
+        {
+            return;
+        }
+
+        if (cell.IsFlagged)
+        {
+            cell.IsFlagged = false;
+            flaggedCount--;
+            return;
+        }
+
+        if (flaggedCount >= MineCount)
+        {
+            return;
+        }
+
+        cell.IsFlagged = true;
+        flaggedCount++;
+    }
+
+    private void CheckWin()
+    {
+        for (var y = 0; y < BoardHeight; y++)
+        {
+            for (var x = 0; x < BoardWidth; x++)
+            {
+                var cell = board[y, x];
+                if (!cell.IsMine && !cell.IsRevealed)
+                {
+                    return;
+                }
+            }
+        }
+
+        isWin = true;
+        gameOverMessage = "Tüm güvenli hücreleri açtın!";
+        RevealAllMines();
+    }
+
+    private void RevealAllMines()
+    {
+        for (var y = 0; y < BoardHeight; y++)
+        {
+            for (var x = 0; x < BoardWidth; x++)
+            {
+                if (board[y, x].IsMine)
+                {
+                    board[y, x].IsRevealed = true;
+                }
+            }
+        }
+    }
+
+    private void EndGame(string message)
+    {
+        isGameOver = true;
+        gameOverMessage = message;
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs args)
+    {
+        if (isGameOver || isWin)
+        {
+            return;
+        }
+
+        var key = args.Key?.ToLowerInvariant();
+        switch (key)
+        {
+            case "arrowup":
+                selectedY = Math.Max(0, selectedY - 1);
+                break;
+            case "arrowdown":
+                selectedY = Math.Min(BoardHeight - 1, selectedY + 1);
+                break;
+            case "arrowleft":
+                selectedX = Math.Max(0, selectedX - 1);
+                break;
+            case "arrowright":
+                selectedX = Math.Min(BoardWidth - 1, selectedX + 1);
+                break;
+            case " ":
+            case "enter":
+                RevealCell(selectedX, selectedY);
+                break;
+            case "f":
+                ToggleFlag(selectedX, selectedY);
+                break;
+        }
+    }
+
+    private string GetCellClass(Cell cell, int x, int y)
+    {
+        var classes = new List<string> { "minesweeper-cell" };
+        classes.Add(cell.IsRevealed ? "revealed" : "hidden");
+        if (cell.IsMine && cell.IsRevealed)
+        {
+            classes.Add("mine");
+        }
+
+        if (cell.IsFlagged)
+        {
+            classes.Add("flag");
+        }
+
+        if (x == selectedX && y == selectedY)
+        {
+            classes.Add("selected");
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private string GetCellContent(Cell cell)
+    {
+        if (cell.IsRevealed)
+        {
+            if (cell.IsMine)
+            {
+                return "💣";
+            }
+
+            return cell.AdjacentMines > 0 ? cell.AdjacentMines.ToString() : string.Empty;
+        }
+
+        return cell.IsFlagged ? "🚩" : string.Empty;
+    }
+
+    private sealed class Cell
+    {
+        public bool IsMine { get; set; }
+        public bool IsRevealed { get; set; }
+        public bool IsFlagged { get; set; }
+        public int AdjacentMines { get; set; }
+    }
+}
