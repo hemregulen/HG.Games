@@ -6,7 +6,7 @@ Modern, responsive ve kullanıcı dostu bir oyun platformu. Blazor WebAssembly t
 
 ## 🎮 Özellikler
 
-- **3 Klasik Oyun**: Yılan Oyunu, Tetris ve Mayın Tarlası
+- **5 Oyun**: Yılan Oyunu, Tetris, Mayın Tarlası, Sudoku ve Renk Sıralama
 - **Responsive Tasarım**: Mobil, tablet ve masaüstü cihazlarda sorunsuz çalışır
 - **Modern UI**: Şık ve kullanıcı dostu arayüz
 - **Klavye Kontrolleri**: Oyunlar klavye tuşları ile kontrol edilebilir
@@ -18,6 +18,7 @@ Modern, responsive ve kullanıcı dostu bir oyun platformu. Blazor WebAssembly t
 Klasik yılan oyunu. Yılanı kontrol ederek yemi topla ve büyü!
 - **Kontroller**: Ok tuşları veya WASD
 - **Hedef**: Yemi topla ve kendine çarpma
+![Yılan Oyunu](https://github.com/user-attachments/assets/481f7db8-d454-438b-a24b-8cd8025df3f5)
 
 ### 🧱 Tetris
 Efsanevi blok yerleştirme oyunu.
@@ -27,6 +28,7 @@ Efsanevi blok yerleştirme oyunu.
   - Aşağı ok: Hızlı düşür
   - Boşluk: Anında düşür
 - **Hedef**: Satırları tamamla ve puan kazan
+![Tetris](https://github.com/user-attachments/assets/2c656997-7143-4449-af52-8b80ffe5c4e8)
 
 ### 💣 Mayın Tarlası
 Klasik mayın tarlası oyunu.
@@ -34,6 +36,19 @@ Klasik mayın tarlası oyunu.
   - Sol tık: Hücreyi aç
   - Sağ tık: Bayrak koy
 - **Hedef**: Tüm mayınları işaretle ve güvenli hücreleri aç
+![Mayın Tarlası](https://github.com/user-attachments/assets/28459a12-04d0-4739-a63c-3e5e97eed7d8)
+
+### 🔢 Sudoku
+Klasik Sudoku bulmacası.
+- **Kontroller**: Ok tuşlarıyla hücre seç, 1-9 ile sayı gir, Backspace/Delete ile sil
+- **Hedef**: Tüm hücreleri doğru sayılarla doldur
+![Sudoku](https://github.com/user-attachments/assets/3cda1659-aa73-4cc4-8828-2b2f356400ff)
+
+### 🧪 Renk Sıralama
+Renkli sıvıları tüplerde doğru şekilde sıralama oyunu.
+- **Kontroller**: Tüplere tıkla ve aynı renkteki sıvıyı uygun tüpe dök
+- **Hedef**: Her tüpte tek renk kalacak şekilde sıvıları ayır
+![Renk Sıralama](https://github.com/user-attachments/assets/9a5d5078-0562-4387-9f15-41af0cf33396)
 
 ## 🛠️ Teknolojiler
 
@@ -55,8 +70,9 @@ HG.Games/
 │   ├── Snake.razor               # Yılan oyunu
 │   ├── Tetris.razor              # Tetris oyunu
 │   ├── Minesweeper.razor         # Mayın tarlası oyunu
+│   ├── Sudoku.razor              # Sudoku oyunu
+│   ├── ColorSort.razor           # Renk sıralama oyunu
 │   ├── Counter.razor             # Demo sayfa
-│   ├── Weather.razor             # Demo sayfa
 │   └── NotFound.razor            # 404 sayfası
 ├── wwwroot/
 │   ├── css/                      # Stil dosyaları
