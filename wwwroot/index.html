@@ -14,13 +14,14 @@
     <script type="importmap"></script>
 </head>
 
-<body>
+<body data-file-warning-en="This app cannot run from the file system. Serve it via a static server."
+      data-file-warning-tr="Bu uygulama dosya sisteminden çalışmaz. Statik bir sunucuyla açın.">
     <div id="app">
         <svg class="loading-progress">
             <circle r="40%" cx="50%" cy="50%" />
             <circle r="40%" cx="50%" cy="50%" />
         </svg>
-        <div class="loading-progress-text"></div>
+        <div class="loading-progress-text" aria-live="polite"></div>
     </div>
 
     <div id="blazor-error-ui">
@@ -28,7 +29,38 @@
         <a href="." class="reload">Reload</a>
         <span class="dismiss">🗙</span>
     </div>
-    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
+    <script>
+        const messages = {
+            en: document.body.dataset.fileWarningEn,
+            tr: document.body.dataset.fileWarningTr
+        };
+        const language = (navigator.language || "en").toLowerCase();
+        const fileMessage = language.startsWith("tr") ? messages.tr : messages.en;
+        window.showFileMessage = () => {
+            // Clear the loading label (--blazor-load-percentage-text in app.css) so only the warning text is visible.
+            document.documentElement.style.setProperty("--blazor-load-percentage-text", "");
+
+            const progress = document.querySelector(".loading-progress");
+            if (progress) {
+                progress.style.display = "none";
+            }
+
+            const warning = document.querySelector(".loading-progress-text");
+            if (warning) {
+                warning.textContent = fileMessage;
+            }
+        };
+        window.handleBlazorScriptError = () => {
+            if (typeof window.showFileMessage === "function") {
+                window.showFileMessage();
+            }
+        };
+
+        if (location.protocol === "file:") {
+            window.showFileMessage();
+        }
+    </script>
+    <script src="_framework/blazor.webassembly#[.{fingerprint}].js" onerror="window.handleBlazorScriptError()"></script>
 </body>
 
 </html>
