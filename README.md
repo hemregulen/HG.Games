@@ -93,6 +93,8 @@ dotnet publish -c Release
 ```
 Build çıktısı `bin/Release/net10.0/publish/` klasöründe olacaktır.
 
+Statik dosyalar `bin/Release/net10.0/publish/wwwroot/` altında bulunur. Bu klasörü masaüstüne kopyalayıp içindeki `index.html` dosyasını açabilir veya basit bir statik sunucuyla servis ederek projeyi yeniden derlemeden kullanabilirsiniz.
+
 ### Projeyi Build Etme
 ```bash
 dotnet build HG.Games.sln
