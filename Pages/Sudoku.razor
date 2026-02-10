@@ -219,7 +219,7 @@
             return true;
         }
 
-        if (key.StartsWith("Numpad", StringComparison.OrdinalIgnoreCase) && key.Length >= 7)
+        if (key.StartsWith("Numpad", StringComparison.OrdinalIgnoreCase) && key.Length >= "Numpad1".Length)
         {
             var lastChar = key[^1];
             if (lastChar >= '1' && lastChar <= '9')
