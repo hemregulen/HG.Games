@@ -30,9 +30,9 @@
     </div>
     <script>
         const fileMessage =
-            '"This app cannot run from the file system. Serve it via a static server. / Bu uygulama dosya sisteminden çalışmaz. Statik sunucuyla açın."';
+            "This app cannot run from the file system. Serve it via a static server. / Bu uygulama dosya sisteminden çalışmaz. Statik sunucuyla açın.";
         const showFileMessage = () => {
-            document.documentElement.style.setProperty("--blazor-load-percentage-text", fileMessage);
+            document.documentElement.style.setProperty("--blazor-load-percentage-text", JSON.stringify(fileMessage));
 
             const progress = document.querySelector(".loading-progress");
             if (progress) {
@@ -40,8 +40,7 @@
             }
         };
 
-        const protocol = location.protocol;
-        if (protocol === "file:") {
+        if (location.protocol === "file:") {
             showFileMessage();
         } else {
             window.addEventListener(
