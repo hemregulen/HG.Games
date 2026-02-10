@@ -35,9 +35,8 @@
             tr: document.body.dataset.fileWarningTr
         };
         const language = navigator.language.toLowerCase();
-        const getMessageForLanguage = (locale) => (locale.startsWith("tr") ? messages.tr : messages.en);
-        const fileMessage = getMessageForLanguage(language);
-        window.showFileMessage = function showFileMessage() {
+        const fileMessage = language.startsWith("tr") ? messages.tr : messages.en;
+        window.showFileMessage = () => {
             // Clear the loading label (--blazor-load-percentage-text in app.css) so only the warning text is visible.
             document.documentElement.style.setProperty("--blazor-load-percentage-text", "");
 
