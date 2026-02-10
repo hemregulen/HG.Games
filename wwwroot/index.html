@@ -14,7 +14,7 @@
     <script type="importmap"></script>
 </head>
 
-<body>
+<body data-file-warning="This app cannot run from the file system. Serve it via a static server. / Bu uygulama dosya sisteminden çalışmaz. Statik sunucuyla açın.">
     <div id="app">
         <svg class="loading-progress">
             <circle r="40%" cx="50%" cy="50%" />
@@ -29,8 +29,7 @@
         <span class="dismiss">🗙</span>
     </div>
     <script>
-        const fileMessage =
-            "This app cannot run from the file system. Serve it via a static server. / Bu uygulama dosya sisteminden çalışmaz. Statik sunucuyla açın.";
+        const fileMessage = document.body.dataset.fileWarning;
         const showFileMessage = () => {
             document.documentElement.style.setProperty("--blazor-load-percentage-text", JSON.stringify(fileMessage));
 
@@ -47,7 +46,12 @@
                 "error",
                 (event) => {
                     const target = event.target;
-                    if (target && target.tagName === "SCRIPT" && target.hasAttribute("data-blazor-webassembly-script")) {
+                    if (
+                        target &&
+                        target.tagName === "SCRIPT" &&
+                        (target.hasAttribute("data-blazor-webassembly-script") ||
+                            target.getAttribute("src")?.includes("_framework/blazor.webassembly"))
+                    ) {
                         showFileMessage();
                     }
                 },
