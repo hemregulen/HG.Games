@@ -14,15 +14,15 @@
     <script type="importmap"></script>
 </head>
 
-<body data-file-warning="This app cannot run from the file system. Serve it via a static server. / Bu uygulama dosya sisteminden çalışmaz. Statik sunucuyla açın.">
+<body data-file-warning-en="This app cannot run from the file system. Serve it via a static server."
+      data-file-warning-tr="Bu uygulama dosya sisteminden çalışmaz. Statik sunucuyla açın.">
     <div id="app">
         <svg class="loading-progress">
             <circle r="40%" cx="50%" cy="50%" />
             <circle r="40%" cx="50%" cy="50%" />
         </svg>
-        <div class="loading-progress-text"></div>
+        <div class="loading-progress-text" aria-live="assertive"></div>
     </div>
-    <div id="file-warning" class="visually-hidden" aria-live="polite"></div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -30,16 +30,19 @@
         <span class="dismiss">🗙</span>
     </div>
     <script>
-        const fileMessage = document.body.dataset.fileWarning;
+        const language = navigator.language.toLowerCase();
+        const fileMessage = language.startsWith("tr")
+            ? document.body.dataset.fileWarningTr
+            : document.body.dataset.fileWarningEn;
         function showFileMessage() {
-            document.documentElement.style.setProperty("--blazor-load-percentage-text", JSON.stringify(fileMessage));
+            document.documentElement.style.setProperty("--blazor-load-percentage-text", JSON.stringify(""));
 
             const progress = document.querySelector(".loading-progress");
             if (progress) {
                 progress.style.display = "none";
             }
 
-            const warning = document.getElementById("file-warning");
+            const warning = document.querySelector(".loading-progress-text");
             if (warning) {
                 warning.textContent = fileMessage;
             }
