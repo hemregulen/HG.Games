@@ -151,15 +151,15 @@
             sameColorCount++;
         }
 
-        var moveCount = Math.Min(availableSpace, sameColorCount);
-        if (moveCount == 0)
+        var pourCount = Math.Min(availableSpace, sameColorCount);
+        if (pourCount == 0)
         {
             return false;
         }
 
-        var startIndex = source.Count - moveCount;
-        var moving = source.GetRange(startIndex, moveCount);
-        source.RemoveRange(startIndex, moveCount);
+        var startIndex = source.Count - pourCount;
+        var moving = source.GetRange(startIndex, pourCount);
+        source.RemoveRange(startIndex, pourCount);
         target.AddRange(moving);
         return true;
     }
