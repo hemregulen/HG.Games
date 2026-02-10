@@ -22,6 +22,7 @@
         </svg>
         <div class="loading-progress-text"></div>
     </div>
+    <div id="file-warning" class="visually-hidden" aria-live="polite"></div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -30,36 +31,25 @@
     </div>
     <script>
         const fileMessage = document.body.dataset.fileWarning;
-        const showFileMessage = () => {
+        function showFileMessage() {
             document.documentElement.style.setProperty("--blazor-load-percentage-text", JSON.stringify(fileMessage));
 
             const progress = document.querySelector(".loading-progress");
             if (progress) {
                 progress.style.display = "none";
             }
-        };
+
+            const warning = document.getElementById("file-warning");
+            if (warning) {
+                warning.textContent = fileMessage;
+            }
+        }
 
         if (location.protocol === "file:") {
             showFileMessage();
-        } else {
-            window.addEventListener(
-                "error",
-                (event) => {
-                    const target = event.target;
-                    if (
-                        target &&
-                        target.tagName === "SCRIPT" &&
-                        (target.hasAttribute("data-blazor-webassembly-script") ||
-                            target.getAttribute("src")?.includes("_framework/blazor.webassembly"))
-                    ) {
-                        showFileMessage();
-                    }
-                },
-                true
-            );
         }
     </script>
-    <script src="_framework/blazor.webassembly#[.{fingerprint}].js" data-blazor-webassembly-script="true"></script>
+    <script src="_framework/blazor.webassembly#[.{fingerprint}].js" onerror="showFileMessage()"></script>
 </body>
 
 </html>
