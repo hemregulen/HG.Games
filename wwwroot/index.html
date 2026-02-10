@@ -35,9 +35,10 @@
             tr: document.body.dataset.fileWarningTr
         };
         const language = navigator.language.toLowerCase();
-        const languageKey = language.startsWith("tr") ? "tr" : "en";
-        const fileMessage = messages[languageKey];
-        function showFileMessage() {
+        const getMessageForLanguage = (locale) => (locale.startsWith("tr") ? messages.tr : messages.en);
+        const fileMessage = getMessageForLanguage(language);
+        window.showFileMessage = function showFileMessage() {
+            // Clear the loading label so only the warning text is visible.
             document.documentElement.style.setProperty("--blazor-load-percentage-text", "");
 
             const progress = document.querySelector(".loading-progress");
@@ -49,10 +50,10 @@
             if (warning) {
                 warning.textContent = fileMessage;
             }
-        }
+        };
 
         if (location.protocol === "file:") {
-            showFileMessage();
+            window.showFileMessage();
         }
     </script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js" onerror="showFileMessage()"></script>
