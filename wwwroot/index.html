@@ -21,7 +21,7 @@
             <circle r="40%" cx="50%" cy="50%" />
             <circle r="40%" cx="50%" cy="50%" />
         </svg>
-        <div class="loading-progress-text" aria-live="assertive"></div>
+        <div class="loading-progress-text" aria-live="polite"></div>
     </div>
 
     <div id="blazor-error-ui">
@@ -30,12 +30,15 @@
         <span class="dismiss">🗙</span>
     </div>
     <script>
+        const messages = {
+            en: document.body.dataset.fileWarningEn,
+            tr: document.body.dataset.fileWarningTr
+        };
         const language = navigator.language.toLowerCase();
-        const fileMessage = language.startsWith("tr")
-            ? document.body.dataset.fileWarningTr
-            : document.body.dataset.fileWarningEn;
+        const languageKey = language.startsWith("tr") ? "tr" : "en";
+        const fileMessage = messages[languageKey];
         function showFileMessage() {
-            document.documentElement.style.setProperty("--blazor-load-percentage-text", JSON.stringify(""));
+            document.documentElement.style.setProperty("--blazor-load-percentage-text", "");
 
             const progress = document.querySelector(".loading-progress");
             if (progress) {
