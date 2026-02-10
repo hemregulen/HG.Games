@@ -48,7 +48,7 @@
                 "error",
                 (event) => {
                     const target = event.target;
-                    if (target && target.tagName === "SCRIPT" && target.hasAttribute("data-blazor-script")) {
+                    if (target && target.tagName === "SCRIPT" && target.hasAttribute("data-blazor-webassembly-script")) {
                         showFileMessage();
                     }
                 },
@@ -56,7 +56,7 @@
             );
         }
     </script>
-    <script src="_framework/blazor.webassembly#[.{fingerprint}].js" data-blazor-script="true"></script>
+    <script src="_framework/blazor.webassembly#[.{fingerprint}].js" data-blazor-webassembly-script="true"></script>
 </body>
 
 </html>
