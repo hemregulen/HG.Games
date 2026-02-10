@@ -29,17 +29,31 @@
         <span class="dismiss">🗙</span>
     </div>
     <script>
-        const showFileMessage = location.protocol === "file:" || location.search.includes("file=1");
-        if (showFileMessage) {
+        const showFileMessage = () => {
             document.documentElement.style.setProperty(
                 "--blazor-load-percentage-text",
-                '"Bu uygulama dosya sisteminden çalışmaz. Statik sunucuyla açın."'
+                '"Bu uygulama dosya sisteminden çalışmaz. Statik sunucuyla açın. (Open it via a static server.)"'
             );
 
             const progress = document.querySelector(".loading-progress");
             if (progress) {
                 progress.style.display = "none";
             }
+        };
+
+        if (location.protocol === "file:") {
+            showFileMessage();
+        } else {
+            window.addEventListener(
+                "error",
+                (event) => {
+                    const target = event.target;
+                    if (target && target.tagName === "SCRIPT" && target.src.includes("blazor.webassembly")) {
+                        showFileMessage();
+                    }
+                },
+                true
+            );
         }
     </script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
