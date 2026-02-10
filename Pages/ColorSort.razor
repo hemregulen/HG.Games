@@ -150,8 +150,7 @@
         var targetIndex = tubeIndex;
         if (tubes[sourceIndex].Count == 0 && tubes[targetIndex].Count > 0)
         {
-            sourceIndex = tubeIndex;
-            targetIndex = selectedTubeIndex.Value;
+            (sourceIndex, targetIndex) = (targetIndex, sourceIndex);
         }
 
         if (TryPour(sourceIndex, targetIndex))
