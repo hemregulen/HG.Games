@@ -1,0 +1,188 @@
+@page "/renk-siralama"
+
+<PageTitle>Renk Sıralama</PageTitle>
+
+<div class="color-sort-game">
+    <h1 class="color-sort-title">Renk Sıralama</h1>
+
+    <div class="color-sort-info">
+        <span>Hamle: @moveCount</span>
+        <span>Seçili Tüp: @((selectedTubeIndex is null) ? "Yok" : $"{selectedTubeIndex.Value + 1}. tüp")</span>
+    </div>
+
+    <div class="color-sort-board-wrapper">
+        <div class="color-sort-board" aria-label="Renk sıralama tüpleri">
+            @for (var tubeIndex = 0; tubeIndex < tubes.Count; tubeIndex++)
+            {
+                <button type="button"
+                        class="color-sort-tube @(selectedTubeIndex == tubeIndex ? "is-selected" : string.Empty)"
+                        @onclick="() => HandleTubeClick(tubeIndex)"
+                        disabled="@(isWin)">
+                    @for (var segmentIndex = TubeCapacity - 1; segmentIndex >= 0; segmentIndex--)
+                    {
+                        var color = segmentIndex < tubes[tubeIndex].Count ? tubes[tubeIndex][segmentIndex] : null;
+                        <div class="color-sort-segment @(color is null ? "is-empty" : string.Empty)"
+                             style="background-color: @(color ?? "transparent")"></div>
+                    }
+                </button>
+            }
+        </div>
+
+        @if (isWin)
+        {
+            <div class="color-sort-overlay">
+                <div class="color-sort-overlay-content">
+                    <h2>Tebrikler!</h2>
+                    <p>Renkleri başarıyla ayırdın.</p>
+                    <button class="btn btn-primary" @onclick="StartNewGame">Yeni Oyun</button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="color-sort-controls">
+        <button class="btn btn-outline-primary" @onclick="StartNewGame">Yeniden Karıştır</button>
+        <p><strong>Nasıl oynanır:</strong></p>
+        <p>Tüpe tıklayıp aynı renkteki sıvıyı boş ya da aynı renkteki tüpe dök.</p>
+    </div>
+</div>
+
+@code {
+    private const int TubeCapacity = 4;
+    private static readonly string Red = "#ff6b6b";
+    private static readonly string Blue = "#4facfe";
+    private static readonly string Green = "#43e97b";
+    private static readonly string Yellow = "#feca57";
+
+    private static readonly string[][] InitialTubes =
+    {
+        new[] { Red, Blue, Green, Yellow },
+        new[] { Yellow, Green, Blue, Red },
+        new[] { Blue, Red, Yellow, Green },
+        new[] { Green, Yellow, Red, Blue },
+        Array.Empty<string>(),
+        Array.Empty<string>()
+    };
+
+    private List<List<string>> tubes = new();
+    private int? selectedTubeIndex;
+    private int moveCount;
+    private bool isWin;
+
+    protected override void OnInitialized()
+    {
+        StartNewGame();
+    }
+
+    private void StartNewGame()
+    {
+        tubes = new List<List<string>>();
+        foreach (var tube in InitialTubes)
+        {
+            tubes.Add(new List<string>(tube));
+        }
+
+        selectedTubeIndex = null;
+        moveCount = 0;
+        isWin = false;
+    }
+
+    private void HandleTubeClick(int tubeIndex)
+    {
+        if (isWin)
+        {
+            return;
+        }
+
+        if (selectedTubeIndex is null)
+        {
+            if (tubes[tubeIndex].Count == 0)
+            {
+                return;
+            }
+
+            selectedTubeIndex = tubeIndex;
+            return;
+        }
+
+        if (selectedTubeIndex == tubeIndex)
+        {
+            selectedTubeIndex = null;
+            return;
+        }
+
+        if (TryPour(selectedTubeIndex.Value, tubeIndex))
+        {
+            moveCount++;
+            if (CheckForWin())
+            {
+                isWin = true;
+            }
+        }
+
+        selectedTubeIndex = null;
+    }
+
+    private bool TryPour(int sourceIndex, int targetIndex)
+    {
+        var source = tubes[sourceIndex];
+        var target = tubes[targetIndex];
+
+        if (source.Count == 0 || target.Count == TubeCapacity)
+        {
+            return false;
+        }
+
+        var color = source[^1];
+        if (target.Count > 0 && target[^1] != color)
+        {
+            return false;
+        }
+
+        var availableSpace = TubeCapacity - target.Count;
+        var sameColorCount = 0;
+        for (var i = source.Count - 1; i >= 0; i--)
+        {
+            if (source[i] != color)
+            {
+                break;
+            }
+
+            sameColorCount++;
+        }
+
+        var pourCount = Math.Min(availableSpace, sameColorCount);
+        var startIndex = source.Count - pourCount;
+        var moving = source.GetRange(startIndex, pourCount);
+        source.RemoveRange(startIndex, pourCount);
+        target.AddRange(moving);
+        return true;
+    }
+
+    private bool CheckForWin()
+    {
+        foreach (var tube in tubes)
+        {
+            if (tube.Count == 0)
+            {
+                continue;
+            }
+
+            if (tube.Count != TubeCapacity)
+            {
+                return false;
+            }
+
+            var color = tube[0];
+            for (var i = 1; i < tube.Count; i++)
+            {
+                if (tube[i] != color)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+}
