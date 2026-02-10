@@ -28,6 +28,20 @@
         <a href="." class="reload">Reload</a>
         <span class="dismiss">🗙</span>
     </div>
+    <script>
+        const showFileMessage = location.protocol === "file:" || location.search.includes("file=1");
+        if (showFileMessage) {
+            document.documentElement.style.setProperty(
+                "--blazor-load-percentage-text",
+                '"Bu uygulama dosya sisteminden çalışmaz. Statik sunucuyla açın."'
+            );
+
+            const progress = document.querySelector(".loading-progress");
+            if (progress) {
+                progress.style.display = "none";
+            }
+        }
+    </script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
 </body>
 
