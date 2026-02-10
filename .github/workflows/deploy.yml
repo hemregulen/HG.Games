@@ -25,15 +25,20 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
+      - name: Add SSH host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
       - name: Ensure deploy directory
         run: |
-          ssh -p "${{ secrets.SSH_PORT }}" -o StrictHostKeyChecking=no \
+          ssh -p "${{ secrets.SSH_PORT }}" \
             "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
             "mkdir -p /var/www/apps/hg.games"
 
       - name: Upload published files
         run: |
           rsync -avz --delete \
-            -e "ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" \
+            -e "ssh -p ${{ secrets.SSH_PORT }}" \
             "${{ github.workspace }}/publish/wwwroot/" \
             "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/apps/hg.games/"
