@@ -1,0 +1,279 @@
+@page "/sudoku"
+
+<PageTitle>Sudoku</PageTitle>
+
+<div class="sudoku-game">
+    <h1 class="sudoku-title">Sudoku</h1>
+
+    <div class="sudoku-info">
+        <span>Hata: @errorCount</span>
+        <span>Boş Hücre: @emptyCount</span>
+    </div>
+
+    <div class="sudoku-board-wrapper">
+        <div class="sudoku-board"
+             tabindex="0"
+             aria-label="Sudoku oyun alanı"
+             @onkeydown="HandleKeyDown"
+             @onkeydown:preventDefault="true"
+             @ref="boardRef">
+            @for (var y = 0; y < BoardSize; y++)
+            {
+                @for (var x = 0; x < BoardSize; x++)
+                {
+                    <button type="button"
+                            class="@GetCellClass(x, y)"
+                            @onclick="() => HandleCellClick(x, y)"
+                            disabled="@isSolved">
+                        @GetCellDisplay(x, y)
+                    </button>
+                }
+            }
+        </div>
+
+        @if (isSolved)
+        {
+            <div class="sudoku-overlay">
+                <div class="sudoku-overlay-content">
+                    <h2>Tebrikler!</h2>
+                    <p>Sudoku tamamlandı.</p>
+                    <button class="btn btn-primary" @onclick="StartNewGame">Yeni Oyun</button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="sudoku-controls">
+        <p><strong>Kontroller:</strong></p>
+        <p>Ok Tuşları - Hücre Seç</p>
+        <p>1-9 - Sayı Gir</p>
+        <p>Backspace / Delete - Sil</p>
+    </div>
+</div>
+
+@code {
+    private const int BoardSize = 9;
+
+    private static readonly int[,] Puzzle =
+    {
+        { 5, 3, 0, 0, 7, 0, 0, 0, 0 },
+        { 6, 0, 0, 1, 9, 5, 0, 0, 0 },
+        { 0, 9, 8, 0, 0, 0, 0, 6, 0 },
+        { 8, 0, 0, 0, 6, 0, 0, 0, 3 },
+        { 4, 0, 0, 8, 0, 3, 0, 0, 1 },
+        { 7, 0, 0, 0, 2, 0, 0, 0, 6 },
+        { 0, 6, 0, 0, 0, 0, 2, 8, 0 },
+        { 0, 0, 0, 4, 1, 9, 0, 0, 5 },
+        { 0, 0, 0, 0, 8, 0, 0, 7, 9 }
+    };
+
+    private static readonly int[,] Solution =
+    {
+        { 5, 3, 4, 6, 7, 8, 9, 1, 2 },
+        { 6, 7, 2, 1, 9, 5, 3, 4, 8 },
+        { 1, 9, 8, 3, 4, 2, 5, 6, 7 },
+        { 8, 5, 9, 7, 6, 1, 4, 2, 3 },
+        { 4, 2, 6, 8, 5, 3, 7, 9, 1 },
+        { 7, 1, 3, 9, 2, 4, 8, 5, 6 },
+        { 9, 6, 1, 5, 3, 7, 2, 8, 4 },
+        { 2, 8, 7, 4, 1, 9, 6, 3, 5 },
+        { 3, 4, 5, 2, 8, 6, 1, 7, 9 }
+    };
+
+    private int?[,] board = new int?[BoardSize, BoardSize];
+    private int selectedX;
+    private int selectedY;
+    private int errorCount;
+    private int emptyCount;
+    private bool isSolved;
+    private ElementReference boardRef;
+    private bool shouldFocusBoard = true;
+
+    protected override void OnInitialized()
+    {
+        StartNewGame();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (shouldFocusBoard)
+        {
+            shouldFocusBoard = false;
+            await boardRef.FocusAsync();
+        }
+    }
+
+    private void StartNewGame()
+    {
+        board = new int?[BoardSize, BoardSize];
+        for (var y = 0; y < BoardSize; y++)
+        {
+            for (var x = 0; x < BoardSize; x++)
+            {
+                var value = Puzzle[y, x];
+                board[y, x] = value == 0 ? null : value;
+            }
+        }
+
+        selectedX = 0;
+        selectedY = 0;
+        shouldFocusBoard = true;
+        UpdateGameState();
+    }
+
+    private void UpdateGameState()
+    {
+        errorCount = 0;
+        emptyCount = 0;
+        for (var y = 0; y < BoardSize; y++)
+        {
+            for (var x = 0; x < BoardSize; x++)
+            {
+                var value = board[y, x];
+                if (!value.HasValue)
+                {
+                    emptyCount++;
+                    continue;
+                }
+
+                if (value.Value != Solution[y, x])
+                {
+                    errorCount++;
+                }
+            }
+        }
+
+        isSolved = errorCount == 0 && emptyCount == 0;
+    }
+
+    private async Task HandleCellClick(int x, int y)
+    {
+        selectedX = x;
+        selectedY = y;
+        await boardRef.FocusAsync();
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs args)
+    {
+        if (isSolved)
+        {
+            return;
+        }
+
+        var key = args.Key;
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return;
+        }
+
+        switch (key)
+        {
+            case "ArrowUp":
+                MoveSelection(0, -1);
+                return;
+            case "ArrowDown":
+                MoveSelection(0, 1);
+                return;
+            case "ArrowLeft":
+                MoveSelection(-1, 0);
+                return;
+            case "ArrowRight":
+                MoveSelection(1, 0);
+                return;
+            case "Backspace":
+            case "Delete":
+            case "0":
+                SetCellValue(null);
+                return;
+        }
+
+        if (TryGetDigit(key, out var digit))
+        {
+            SetCellValue(digit);
+        }
+    }
+
+    private void MoveSelection(int deltaX, int deltaY)
+    {
+        selectedX = Math.Clamp(selectedX + deltaX, 0, BoardSize - 1);
+        selectedY = Math.Clamp(selectedY + deltaY, 0, BoardSize - 1);
+    }
+
+    private void SetCellValue(int? value)
+    {
+        if (IsFixed(selectedX, selectedY))
+        {
+            return;
+        }
+
+        board[selectedY, selectedX] = value;
+        UpdateGameState();
+    }
+
+    private static bool TryGetDigit(string key, out int digit)
+    {
+        digit = 0;
+        if (key.Length == 1 && key[0] >= '1' && key[0] <= '9')
+        {
+            digit = key[0] - '0';
+            return true;
+        }
+
+        if (key.StartsWith("Numpad", StringComparison.OrdinalIgnoreCase) && key.Length >= 7)
+        {
+            var lastChar = key[^1];
+            if (lastChar >= '1' && lastChar <= '9')
+            {
+                digit = lastChar - '0';
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private string GetCellClass(int x, int y)
+    {
+        var classes = new List<string> { "sudoku-cell" };
+        if (IsFixed(x, y))
+        {
+            classes.Add("sudoku-cell-fixed");
+        }
+
+        if (selectedX == x && selectedY == y)
+        {
+            classes.Add("sudoku-cell-selected");
+        }
+
+        if (IsCellIncorrect(x, y))
+        {
+            classes.Add("sudoku-cell-error");
+        }
+
+        if (x == 2 || x == 5)
+        {
+            classes.Add("sudoku-border-right");
+        }
+
+        if (y == 2 || y == 5)
+        {
+            classes.Add("sudoku-border-bottom");
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private bool IsFixed(int x, int y) => Puzzle[y, x] != 0;
+
+    private bool IsCellIncorrect(int x, int y)
+    {
+        var value = board[y, x];
+        return value.HasValue && value.Value != Solution[y, x];
+    }
+
+    private string GetCellDisplay(int x, int y)
+    {
+        var value = board[y, x];
+        return value.HasValue ? value.Value.ToString() : string.Empty;
+    }
+}
