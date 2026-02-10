@@ -50,12 +50,17 @@
                 warning.textContent = fileMessage;
             }
         };
+        window.handleBlazorScriptError = () => {
+            if (typeof window.showFileMessage === "function") {
+                window.showFileMessage();
+            }
+        };
 
         if (location.protocol === "file:") {
             window.showFileMessage();
         }
     </script>
-    <script src="_framework/blazor.webassembly#[.{fingerprint}].js" onerror="window.showFileMessage && window.showFileMessage()"></script>
+    <script src="_framework/blazor.webassembly#[.{fingerprint}].js" onerror="window.handleBlazorScriptError()"></script>
 </body>
 
 </html>
