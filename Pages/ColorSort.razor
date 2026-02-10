@@ -11,11 +11,16 @@
     </div>
 
     <div class="color-sort-board-wrapper">
-        <div class="color-sort-board" aria-label="Renk sıralama tüpleri">
+        <div class="color-sort-board"
+             tabindex="0"
+             aria-label="Renk sıralama tüpleri"
+             @onkeydown="HandleKeyDown"
+             @onkeydown:preventDefault="true"
+             @ref="boardRef">
             @for (var tubeIndex = 0; tubeIndex < tubes.Count; tubeIndex++)
             {
                 <button type="button"
-                        class="color-sort-tube @(selectedTubeIndex == tubeIndex ? "is-selected" : string.Empty)"
+                        class="color-sort-tube @(selectedTubeIndex == tubeIndex ? "is-selected" : string.Empty) @(focusedTubeIndex == tubeIndex ? "is-focused" : string.Empty)"
                         @onclick="() => HandleTubeClick(tubeIndex)"
                         disabled="@(isWin)">
                     @for (var segmentIndex = TubeCapacity - 1; segmentIndex >= 0; segmentIndex--)
@@ -44,6 +49,10 @@
         <button class="btn btn-outline-primary" @onclick="StartNewGame">Yeniden Karıştır</button>
         <p><strong>Nasıl oynanır:</strong></p>
         <p>Tüpe tıklayıp aynı renkteki sıvıyı boş ya da aynı renkteki tüpe dök.</p>
+        <p><strong>Kontroller:</strong></p>
+        <p>Ok Tuşları - Tüp değiştir</p>
+        <p>Enter / Boşluk - Tüp seç veya dök</p>
+        <p>Esc - Seçimi iptal et</p>
     </div>
 </div>
 
@@ -54,37 +63,67 @@
     private static readonly string Green = "#43e97b";
     private static readonly string Yellow = "#feca57";
 
-    private static readonly string[][] InitialTubes =
-    {
-        new[] { Red, Blue, Green, Yellow },
-        new[] { Yellow, Green, Blue, Red },
-        new[] { Blue, Red, Yellow, Green },
-        new[] { Green, Yellow, Red, Blue },
-        Array.Empty<string>(),
-        Array.Empty<string>()
-    };
+    private const int EmptyTubeCount = 2;
+    private static readonly string[] Colors = { Red, Blue, Green, Yellow };
 
+    private readonly Random random = new();
     private List<List<string>> tubes = new();
     private int? selectedTubeIndex;
     private int moveCount;
     private bool isWin;
+    private int focusedTubeIndex;
+    private ElementReference boardRef;
+    private bool shouldFocusBoard = true;
 
     protected override void OnInitialized()
     {
         StartNewGame();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (shouldFocusBoard)
+        {
+            shouldFocusBoard = false;
+            await boardRef.FocusAsync();
+        }
+    }
+
     private void StartNewGame()
     {
-        tubes = new List<List<string>>();
-        foreach (var tube in InitialTubes)
+        var colorPool = new List<string>(Colors.Length * TubeCapacity);
+        foreach (var color in Colors)
         {
-            tubes.Add(new List<string>(tube));
+            for (var i = 0; i < TubeCapacity; i++)
+            {
+                colorPool.Add(color);
+            }
+        }
+
+        Shuffle(colorPool);
+
+        tubes = new List<List<string>>();
+        var colorIndex = 0;
+        for (var i = 0; i < Colors.Length; i++)
+        {
+            var tube = new List<string>();
+            for (var segment = 0; segment < TubeCapacity; segment++)
+            {
+                tube.Add(colorPool[colorIndex++]);
+            }
+            tubes.Add(tube);
+        }
+
+        for (var i = 0; i < EmptyTubeCount; i++)
+        {
+            tubes.Add(new List<string>());
         }
 
         selectedTubeIndex = null;
         moveCount = 0;
         isWin = false;
+        focusedTubeIndex = 0;
+        shouldFocusBoard = true;
     }
 
     private void HandleTubeClick(int tubeIndex)
@@ -94,13 +133,9 @@
             return;
         }
 
+        focusedTubeIndex = tubeIndex;
         if (selectedTubeIndex is null)
         {
-            if (tubes[tubeIndex].Count == 0)
-            {
-                return;
-            }
-
             selectedTubeIndex = tubeIndex;
             return;
         }
@@ -111,7 +146,14 @@
             return;
         }
 
-        if (TryPour(selectedTubeIndex.Value, tubeIndex))
+        var sourceIndex = selectedTubeIndex.Value;
+        var targetIndex = tubeIndex;
+        if (tubes[sourceIndex].Count == 0 && tubes[targetIndex].Count > 0)
+        {
+            (sourceIndex, targetIndex) = (targetIndex, sourceIndex);
+        }
+
+        if (TryPour(sourceIndex, targetIndex))
         {
             moveCount++;
             if (CheckForWin())
@@ -121,6 +163,70 @@
         }
 
         selectedTubeIndex = null;
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs args)
+    {
+        if (isWin)
+        {
+            return;
+        }
+
+        if (tubes.Count == 0)
+        {
+            return;
+        }
+
+        switch (args.Key)
+        {
+            case "ArrowLeft":
+            case "a":
+            case "A":
+                MoveFocus(-1);
+                break;
+            case "ArrowRight":
+            case "d":
+            case "D":
+                MoveFocus(1);
+                break;
+            case "ArrowUp":
+            case "w":
+            case "W":
+                MoveFocus(-1);
+                break;
+            case "ArrowDown":
+            case "s":
+            case "S":
+                MoveFocus(1);
+                break;
+            case "Enter":
+            case " ":
+                HandleTubeClick(focusedTubeIndex);
+                break;
+            case "Escape":
+                selectedTubeIndex = null;
+                break;
+        }
+    }
+
+    private void MoveFocus(int delta)
+    {
+        var count = tubes.Count;
+        if (count == 0)
+        {
+            return;
+        }
+
+        focusedTubeIndex = (focusedTubeIndex + delta + count) % count;
+    }
+
+    private void Shuffle<T>(IList<T> items)
+    {
+        for (var i = items.Count - 1; i > 0; i--)
+        {
+            var swapIndex = random.Next(i + 1);
+            (items[i], items[swapIndex]) = (items[swapIndex], items[i]);
+        }
     }
 
     private bool TryPour(int sourceIndex, int targetIndex)
