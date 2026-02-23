@@ -8,6 +8,39 @@
     padding: 2rem 1rem;
 }
 
+.game-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.4rem 0.75rem;
+    background-color: #1b6ec2;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.back-button:hover {
+    background-color: #155a9c;
+    color: #fff;
+}
+
+.game-logo {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ff6b6b;
+}
+
 .sudoku-title {
     text-align: center;
     margin-bottom: 1rem;
@@ -22,6 +55,8 @@
 .sudoku-board-wrapper {
     position: relative;
     width: fit-content;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .sudoku-board {
@@ -97,4 +132,81 @@
 
 .sudoku-controls p {
     margin: 0.25rem 0;
+}
+
+.mobile-numpad {
+    display: none;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 320px;
+}
+
+.numpad-btn {
+    height: 48px;
+    border: none;
+    border-radius: 10px;
+    background-color: #1b6ec2;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.numpad-btn:active {
+    background-color: #155a9c;
+    transform: scale(0.95);
+}
+
+.numpad-delete {
+    background-color: #dc3545;
+}
+
+.numpad-delete:active {
+    background-color: #b02a37;
+}
+
+@media (max-width: 600px) {
+    .sudoku-board {
+        grid-template-columns: repeat(9, 34px);
+        grid-template-rows: repeat(9, 34px);
+    }
+
+    .sudoku-cell {
+        width: 34px;
+        height: 34px;
+        font-size: 0.95rem;
+    }
+
+    .sudoku-controls {
+        display: none;
+    }
+
+    .mobile-numpad {
+        display: grid;
+    }
+
+    .sudoku-title {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .sudoku-board {
+        grid-template-columns: repeat(9, 30px);
+        grid-template-rows: repeat(9, 30px);
+    }
+
+    .sudoku-cell {
+        width: 30px;
+        height: 30px;
+        font-size: 0.85rem;
+    }
 }

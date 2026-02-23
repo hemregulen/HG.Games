@@ -4,6 +4,10 @@
 <PageTitle>Yılan Oyunu</PageTitle>
 
 <div class="snake-game">
+    <div class="game-top-bar">
+        <a href="./" class="back-button">← Ana Sayfa</a>
+        <span class="game-logo">🥙 kebab.games</span>
+    </div>
     <h1 class="snake-title">Yılan Oyunu</h1>
 
     <div class="snake-info">
@@ -44,6 +48,13 @@
         <p>A - Sol</p>
         <p>S - Aşağı</p>
         <p>D - Sağ</p>
+    </div>
+
+    <div class="mobile-dpad">
+        <button class="dpad-btn dpad-up" @onclick="() => SetDirection(Direction.Up)">▲</button>
+        <button class="dpad-btn dpad-left" @onclick="() => SetDirection(Direction.Left)">◄</button>
+        <button class="dpad-btn dpad-right" @onclick="() => SetDirection(Direction.Right)">►</button>
+        <button class="dpad-btn dpad-down" @onclick="() => SetDirection(Direction.Down)">▼</button>
     </div>
 </div>
 
@@ -236,6 +247,15 @@
     private void RestartGame()
     {
         StartNewGame();
+    }
+
+    private void SetDirection(Direction direction)
+    {
+        if (isGameOver) return;
+        if (!IsOppositeDirection(currentDirection, direction))
+        {
+            pendingDirection = direction;
+        }
     }
 
     public void Dispose()

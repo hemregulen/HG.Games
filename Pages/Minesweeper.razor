@@ -3,6 +3,10 @@
 <PageTitle>Mayın Tarlası</PageTitle>
 
 <div class="minesweeper-game">
+    <div class="game-top-bar">
+        <a href="./" class="back-button">← Ana Sayfa</a>
+        <span class="game-logo">🥙 kebab.games</span>
+    </div>
     <h1 class="minesweeper-title">Mayın Tarlası</h1>
 
     <div class="minesweeper-info">
@@ -52,6 +56,12 @@
         <p>Sağ Tık / F - Bayrak Koy</p>
         <p>Ok Tuşları - Hareket</p>
     </div>
+
+    <div class="mobile-flag-toggle">
+        <button class="flag-toggle-btn @(isFlagMode ? "active" : "")" @onclick="ToggleFlagMode">
+            @(isFlagMode ? "🚩 Bayrak Modu" : "👆 Açma Modu")
+        </button>
+    </div>
 </div>
 
 @code {
@@ -70,6 +80,7 @@
     private bool shouldFocusBoard = true;
     private int selectedX;
     private int selectedY;
+    private bool isFlagMode;
 
     protected override void OnInitialized()
     {
@@ -103,6 +114,7 @@
         gameOverMessage = string.Empty;
         selectedX = 0;
         selectedY = 0;
+        isFlagMode = false;
         shouldFocusBoard = true;
     }
 
@@ -167,7 +179,14 @@
     {
         selectedX = x;
         selectedY = y;
-        RevealCell(x, y);
+        if (isFlagMode)
+        {
+            ToggleFlag(x, y);
+        }
+        else
+        {
+            RevealCell(x, y);
+        }
     }
 
     private void HandleCellFlag(int x, int y)
@@ -320,6 +339,11 @@
     {
         isGameOver = true;
         gameOverMessage = message;
+    }
+
+    private void ToggleFlagMode()
+    {
+        isFlagMode = !isFlagMode;
     }
 
     private void HandleKeyDown(KeyboardEventArgs args)
