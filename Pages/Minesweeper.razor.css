@@ -8,6 +8,39 @@
     padding: 2rem 1rem;
 }
 
+.game-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.4rem 0.75rem;
+    background-color: #1b6ec2;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.back-button:hover {
+    background-color: #155a9c;
+    color: #fff;
+}
+
+.game-logo {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ff6b6b;
+}
+
 .minesweeper-info {
     display: flex;
     justify-content: space-between;
@@ -17,6 +50,8 @@
 .minesweeper-board-wrapper {
     position: relative;
     width: fit-content;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .minesweeper-board {
@@ -92,4 +127,67 @@
 
 .minesweeper-controls p {
     margin: 0.25rem 0;
+}
+
+.mobile-flag-toggle {
+    display: none;
+    margin-top: 0.5rem;
+}
+
+.flag-toggle-btn {
+    padding: 0.6rem 1.5rem;
+    border: 2px solid #1b6ec2;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    color: #1b6ec2;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.flag-toggle-btn.active {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+
+@media (max-width: 600px) {
+    .minesweeper-board {
+        grid-template-columns: repeat(10, 30px);
+        grid-template-rows: repeat(10, 30px);
+    }
+
+    .minesweeper-cell {
+        width: 30px;
+        height: 30px;
+        font-size: 0.85rem;
+    }
+
+    .minesweeper-controls {
+        display: none;
+    }
+
+    .mobile-flag-toggle {
+        display: block;
+    }
+
+    .minesweeper-title {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .minesweeper-board {
+        grid-template-columns: repeat(10, 26px);
+        grid-template-rows: repeat(10, 26px);
+    }
+
+    .minesweeper-cell {
+        width: 26px;
+        height: 26px;
+        font-size: 0.8rem;
+    }
 }

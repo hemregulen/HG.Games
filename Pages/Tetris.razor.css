@@ -8,6 +8,39 @@
     padding: 2rem 1rem;
 }
 
+.game-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.4rem 0.75rem;
+    background-color: #1b6ec2;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.back-button:hover {
+    background-color: #155a9c;
+    color: #fff;
+}
+
+.game-logo {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ff6b6b;
+}
+
 .tetris-info {
     font-weight: 600;
 }
@@ -15,6 +48,8 @@
 .tetris-board-wrapper {
     position: relative;
     width: fit-content;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .tetris-board {
@@ -92,4 +127,68 @@
 
 .tetris-controls p {
     margin: 0.25rem 0;
+}
+
+.mobile-controls {
+    display: none;
+    gap: 8px;
+    margin-top: 1rem;
+}
+
+.ctrl-btn {
+    width: 64px;
+    height: 56px;
+    border: none;
+    border-radius: 12px;
+    background-color: #1b6ec2;
+    color: #fff;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.ctrl-btn:active {
+    background-color: #155a9c;
+    transform: scale(0.95);
+}
+
+@media (max-width: 600px) {
+    .tetris-board {
+        grid-template-columns: repeat(10, 20px);
+        grid-template-rows: repeat(20, 20px);
+    }
+
+    .tetris-cell {
+        width: 20px;
+        height: 20px;
+    }
+
+    .tetris-controls {
+        display: none;
+    }
+
+    .mobile-controls {
+        display: flex;
+    }
+
+    .tetris-title {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .tetris-board {
+        grid-template-columns: repeat(10, 16px);
+        grid-template-rows: repeat(20, 16px);
+    }
+
+    .tetris-cell {
+        width: 16px;
+        height: 16px;
+    }
 }

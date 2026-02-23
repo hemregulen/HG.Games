@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#ff6b6b"/>
+  <!-- Kebab skewer stick -->
+  <rect x="30" y="8" width="4" height="48" rx="2" fill="#8B4513"/>
+  <!-- Meat pieces -->
+  <ellipse cx="32" cy="18" rx="10" ry="5" fill="#c0392b"/>
+  <ellipse cx="32" cy="28" rx="11" ry="5" fill="#27ae60"/>
+  <ellipse cx="32" cy="38" rx="10" ry="5" fill="#e67e22"/>
+  <ellipse cx="32" cy="48" rx="9" ry="4" fill="#c0392b"/>
+</svg>

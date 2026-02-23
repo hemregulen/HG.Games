@@ -3,6 +3,10 @@
 <PageTitle>Sudoku</PageTitle>
 
 <div class="sudoku-game">
+    <div class="game-top-bar">
+        <a href="./" class="back-button">← Ana Sayfa</a>
+        <span class="game-logo">🥙 kebab.games</span>
+    </div>
     <h1 class="sudoku-title">Sudoku</h1>
 
     <div class="sudoku-info">
@@ -48,6 +52,15 @@
         <p>Ok Tuşları - Hücre Seç</p>
         <p>1-9 - Sayı Gir</p>
         <p>Backspace / Delete - Sil</p>
+    </div>
+
+    <div class="mobile-numpad">
+        @for (var i = 1; i <= 9; i++)
+        {
+            var digit = i;
+            <button class="numpad-btn" @onclick="() => SetCellValue(digit)">@digit</button>
+        }
+        <button class="numpad-btn numpad-delete" @onclick="() => SetCellValue(null)">✕</button>
     </div>
 </div>
 

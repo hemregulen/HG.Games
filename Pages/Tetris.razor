@@ -4,6 +4,10 @@
 <PageTitle>Tetris</PageTitle>
 
 <div class="tetris-game">
+    <div class="game-top-bar">
+        <a href="./" class="back-button">← Ana Sayfa</a>
+        <span class="game-logo">🥙 kebab.games</span>
+    </div>
     <h1 class="tetris-title">Tetris</h1>
 
     <div class="tetris-info">
@@ -44,6 +48,13 @@
         <p>→ / D - Sağ</p>
         <p>↓ / S - Aşağı</p>
         <p>↑ / W - Döndür</p>
+    </div>
+
+    <div class="mobile-controls">
+        <button class="ctrl-btn" @onclick="() => TryMove(-1, 0)">◄</button>
+        <button class="ctrl-btn" @onclick="RotatePiece">↻</button>
+        <button class="ctrl-btn" @onclick="() => TryMove(0, 1)">▼</button>
+        <button class="ctrl-btn" @onclick="() => TryMove(1, 0)">►</button>
     </div>
 </div>
 
