@@ -48,7 +48,34 @@ Klasik Sudoku bulmacası.
 Renkli sıvıları tüplerde doğru şekilde sıralama oyunu.
 - **Kontroller**: Tüplere tıkla ve aynı renkteki sıvıyı uygun tüpe dök
 - **Hedef**: Her tüpte tek renk kalacak şekilde sıvıları ayır
+
 ![Renk Sıralama](https://github.com/user-attachments/assets/9a5d5078-0562-4387-9f15-41af0cf33396)
+
+### 🌯 Kebab Hunters
+Eğlenceli ve zorlu bir yakalama oyunu! Yukarıdan düşen dürümleri yakala, sebzelerden kaç!
+- **Kontroller**: 
+  - A veya ← : Sola hareket
+  - D veya → : Sağa hareket
+  - Mobil: Dokunmatik kontrol butonları
+- **Oynanış**:
+  - 🌯 Dürümleri yakalayarak puan kazan (+10 puan)
+  - 🥬🥒🥕 Sebzeleri yakalama (-1 can)
+  - Her 100 puanda +1 can kazan (maksimum 5 can)
+  - Her 3 saniyede sebze oranı %5 artıyor
+  - Her 10 saniyede düşen item sayısı +1 artıyor
+- **Zorluk Sistemi**:
+  - Oyun başlangıcında %50 sebze, %50 dürüm
+  - 30 saniye sonra %95 sebze düşüyor (maksimum zorluk!)
+  - Düşme hızı giderek artıyor
+  - Uzun süre hayatta kalmak gerçek bir başarı!
+
+<!-- GIF için yer tutucu - kebab-hunters.gif eklenecek -->
+![Kebab Hunters](https://via.placeholder.com/600x400/87ceeb/d4380d?text=Kebab+Hunters+%F0%9F%8C%AF)
+
+> **Not**: Kebab Hunters oyununa GIF eklemek için:
+> 1. Oyunu oynayın ve ekran kaydı alın
+> 2. GIF'e dönüştürün (ScreenToGif, Giphy Capture vb. kullanarak)
+> 3. GitHub'a yükleyin ve URL'yi buraya ekleyin
 
 ## 🛠️ Teknolojiler
 
