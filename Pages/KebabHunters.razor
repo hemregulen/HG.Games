@@ -1,0 +1,277 @@
+@page "/kebab-hunters"
+@implements IDisposable
+
+<PageTitle>Kebab Hunters</PageTitle>
+
+<div class="kebab-game">
+    <div class="game-top-bar">
+        <a href="./" class="back-button">← Ana Sayfa</a>
+        <span class="game-logo">🥙 kebab.games</span>
+    </div>
+    <h1 class="game-title">Kebab Hunters</h1>
+
+    <div class="game-info">
+        <span class="score">Puan: @score</span>
+        <span class="lives">❤️ x @lives</span>
+    </div>
+
+    @if (!gameStarted)
+    {
+        <div class="start-screen">
+            <div class="start-content">
+                <h2>Kebab Hunters'a Hoş Geldiniz!</h2>
+                <p>🌯 Dürümleri yakalayın, puan kazanın!</p>
+                <p>🥗 Sebzelerden kaçının!</p>
+                <button class="btn btn-primary btn-lg" @onclick="StartGame">Oyunu Başlat</button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="game-board"
+             tabindex="0"
+             @onkeydown="HandleKeyDown"
+             @onkeydown:preventDefault="true"
+             @ref="boardRef">
+            
+            @foreach (var item in fallingItems)
+            {
+                <div class="falling-item @item.Type" 
+                     style="left: @(item.X)px; top: @(item.Y)px;">
+                    @item.Emoji
+                </div>
+            }
+
+            <div class="player" style="left: @(playerX)px;">
+                <div class="player-head">🧔🏽</div>
+            </div>
+
+            @if (isGameOver)
+            {
+                <div class="game-overlay">
+                    <div class="overlay-content">
+                        <h2>Oyun Bitti!</h2>
+                        <p class="final-score">Final Puanı: @score</p>
+                        <p class="game-over-message">@gameOverMessage</p>
+                        <button class="btn btn-primary" @onclick="RestartGame">Yeniden Başla</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="game-controls">
+            <p><strong>Kontroller:</strong></p>
+            <p>A veya ← - Sola Git</p>
+            <p>D veya → - Sağa Git</p>
+        </div>
+
+        <div class="mobile-controls">
+            <button class="control-btn" @onclick="() => MovePlayer(-1)">◄</button>
+            <button class="control-btn" @onclick="() => MovePlayer(1)">►</button>
+        </div>
+    }
+</div>
+
+@code {
+    private const int BoardWidth = 600;
+    private const int BoardHeight = 400;
+    private const int PlayerWidth = 60;
+    private const int ItemSize = 40;
+    private const int PlayerSpeed = 20;
+    private const int InitialLives = 3;
+    private const int DifficultyIncreaseInterval = 3000; // 3 saniye
+
+    private static readonly TimeSpan InitialSpawnInterval = TimeSpan.FromMilliseconds(1200);
+    private static readonly TimeSpan MinSpawnInterval = TimeSpan.FromMilliseconds(400);
+    private static readonly TimeSpan MoveInterval = TimeSpan.FromMilliseconds(20);
+
+    private readonly Random random = new();
+    private readonly List<FallingItem> fallingItems = new();
+    private readonly string[] veggies = { "🥬", "🥒", "🥕", "🌶️", "🧅", "🍅" };
+
+    private ElementReference boardRef;
+    private CancellationTokenSource? gameLoopCts;
+    
+    private bool gameStarted = false;
+    private bool isGameOver = false;
+    private int playerX = (BoardWidth - PlayerWidth) / 2;
+    private int score = 0;
+    private int lives = InitialLives;
+    private string gameOverMessage = string.Empty;
+    private TimeSpan currentSpawnInterval = InitialSpawnInterval;
+    private bool shouldFocusBoard = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (shouldFocusBoard)
+        {
+            shouldFocusBoard = false;
+            await boardRef.FocusAsync();
+        }
+    }
+
+    private void StartGame()
+    {
+        gameStarted = true;
+        playerX = (BoardWidth - PlayerWidth) / 2;
+        score = 0;
+        lives = InitialLives;
+        isGameOver = false;
+        gameOverMessage = string.Empty;
+        fallingItems.Clear();
+        currentSpawnInterval = InitialSpawnInterval;
+        shouldFocusBoard = true;
+        
+        StartGameLoop();
+    }
+
+    private void StartGameLoop()
+    {
+        gameLoopCts?.Cancel();
+        gameLoopCts?.Dispose();
+        gameLoopCts = new CancellationTokenSource();
+        _ = RunGameLoopAsync(gameLoopCts.Token);
+    }
+
+    private async Task RunGameLoopAsync(CancellationToken token)
+    {
+        var lastSpawnTime = DateTime.UtcNow;
+        
+        using var timer = new PeriodicTimer(MoveInterval);
+        while (await timer.WaitForNextTickAsync(token))
+        {
+            await InvokeAsync(() =>
+            {
+                if (!isGameOver && gameStarted)
+                {
+                    var now = DateTime.UtcNow;
+                    
+                    if ((now - lastSpawnTime) >= currentSpawnInterval)
+                    {
+                        SpawnItem();
+                        lastSpawnTime = now;
+                        
+                        if (currentSpawnInterval > MinSpawnInterval)
+                        {
+                            currentSpawnInterval = TimeSpan.FromMilliseconds(
+                                currentSpawnInterval.TotalMilliseconds * 0.49);
+                        }
+                    }
+                    
+                    UpdateGame();
+                    StateHasChanged();
+                }
+            });
+        }
+    }
+
+    private void SpawnItem()
+    {
+        var isKebab = random.Next(100) < 15;
+        var x = random.Next(0, BoardWidth - ItemSize);
+
+        fallingItems.Add(new FallingItem
+        {
+            X = x,
+            Y = -ItemSize,
+            Type = isKebab ? "kebab" : "veggie",
+            Emoji = isKebab ? "🌯" : veggies[random.Next(veggies.Length)]
+        });
+    }
+
+    private void UpdateGame()
+    {
+        for (int i = fallingItems.Count - 1; i >= 0; i--)
+        {
+            var item = fallingItems[i];
+            item.Y += 3;
+
+            if (item.Y > BoardHeight)
+            {
+                fallingItems.RemoveAt(i);
+                continue;
+            }
+
+            // Collision detection - karakterin kafası seviyesinde kontrol
+            if (item.Y >= BoardHeight - 100 && item.Y <= BoardHeight - 10)
+            {
+                var playerCenter = playerX + PlayerWidth / 2;
+                var itemCenter = item.X + ItemSize / 2;
+
+                // Yakalama mesafesini artırıyoruz
+                if (Math.Abs(playerCenter - itemCenter) < 40)
+                {
+                    if (item.Type == "kebab")
+                    {
+                        score += 10;
+                        if (score % 100 == 0)
+                        {
+                            lives = Math.Min(lives + 1, 5);
+                        }
+                    }
+                    else
+                    {
+                        lives--;
+                        if (lives <= 0)
+                        {
+                            EndGame("Sebze yemeyi sevmiyorum! 😢");
+                        }
+                    }
+
+                    fallingItems.RemoveAt(i);
+                }
+            }
+        }
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs args)
+    {
+        if (isGameOver || !gameStarted) return;
+
+        var key = args.Key?.ToLowerInvariant();
+        switch (key)
+        {
+            case "a":
+            case "arrowleft":
+                MovePlayer(-1);
+                break;
+            case "d":
+            case "arrowright":
+                MovePlayer(1);
+                break;
+        }
+    }
+
+    private void MovePlayer(int direction)
+    {
+        if (isGameOver || !gameStarted) return;
+        
+        playerX += direction * PlayerSpeed;
+        playerX = Math.Clamp(playerX, 0, BoardWidth - PlayerWidth);
+    }
+
+    private void EndGame(string message)
+    {
+        isGameOver = true;
+        gameOverMessage = message;
+    }
+
+    private void RestartGame()
+    {
+        StartGame();
+    }
+
+    public void Dispose()
+    {
+        gameLoopCts?.Cancel();
+        gameLoopCts?.Dispose();
+    }
+
+    private class FallingItem
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public string Type { get; set; } = string.Empty;
+        public string Emoji { get; set; } = string.Empty;
+    }
+}
