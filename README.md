@@ -69,14 +69,6 @@ Eğlenceli ve zorlu bir yakalama oyunu! Yukarıdan düşen dürümleri yakala, s
   - Düşme hızı giderek artıyor
   - Uzun süre hayatta kalmak gerçek bir başarı!
 
-<!-- GIF için yer tutucu - kebab-hunters.gif eklenecek -->
-![Kebab Hunters](https://via.placeholder.com/600x400/87ceeb/d4380d?text=Kebab+Hunters+%F0%9F%8C%AF)
-
-> **Not**: Kebab Hunters oyununa GIF eklemek için:
-> 1. Oyunu oynayın ve ekran kaydı alın
-> 2. GIF'e dönüştürün (ScreenToGif, Giphy Capture vb. kullanarak)
-> 3. GitHub'a yükleyin ve URL'yi buraya ekleyin
-
 ## 🛠️ Teknolojiler
 
 - **.NET 10.0**: En son .NET framework
