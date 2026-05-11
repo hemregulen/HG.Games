@@ -1,0 +1,150 @@
+@page "/cv"
+@inject IJSRuntime JS
+
+<PageTitle>CV - H. Emre Gülen</PageTitle>
+
+<div class="cv-container" id="cv-content">
+    <!-- Header -->
+    <header class="cv-header">
+        <div class="cv-header-info">
+            <h1 class="cv-name">H. Emre Gülen</h1>
+            <p class="cv-title">Yazılım Geliştirici</p>
+            <div class="cv-contact">
+                <span>📧 hemregulen@gmail.com</span>
+                <span>💼 <a href="https://github.com/hemregulen" target="_blank">github.com/hemregulen</a></span>
+            </div>
+        </div>
+        <div class="cv-actions no-print">
+            <button class="btn-print" @onclick="PrintCV">🖨️ PDF Olarak İndir</button>
+        </div>
+    </header>
+
+    <!-- Yetenekler (Skills) -->
+    <section class="cv-section">
+        <h2 class="cv-section-title">🛠️ Yetenekler</h2>
+        <div class="skills-grid">
+            <div class="skill-category">
+                <h3 class="skill-category-title">Backend Geliştirme</h3>
+                <ul class="skill-list">
+                    <li>C# / .NET (Core, 8, 9, 10)</li>
+                    <li>ASP.NET Core Web API</li>
+                    <li>Entity Framework Core</li>
+                    <li>MSSQL / PostgreSQL</li>
+                    <li>RESTful API Tasarımı</li>
+                </ul>
+            </div>
+            <div class="skill-category">
+                <h3 class="skill-category-title">Frontend Geliştirme</h3>
+                <ul class="skill-list">
+                    <li>Blazor WebAssembly / Server</li>
+                    <li>HTML5 / CSS3</li>
+                    <li>JavaScript / TypeScript</li>
+                    <li>Bootstrap</li>
+                </ul>
+            </div>
+            <div class="skill-category">
+                <h3 class="skill-category-title">🤖 AI Agent Geliştirme</h3>
+                <ul class="skill-list">
+                    <li>AI Agent Tasarımı ve Geliştirme</li>
+                    <li>Prompt Mühendisliği (Prompt Engineering)</li>
+                    <li>LLM Entegrasyonu (OpenAI, Azure OpenAI)</li>
+                    <li>Microsoft Semantic Kernel</li>
+                    <li>Microsoft Copilot Studio</li>
+                    <li>RAG (Retrieval-Augmented Generation)</li>
+                    <li>Çok Ajanlı Sistem (Multi-Agent) Mimarisi</li>
+                </ul>
+            </div>
+            <div class="skill-category">
+                <h3 class="skill-category-title">DevOps &amp; Araçlar</h3>
+                <ul class="skill-list">
+                    <li>Docker / Docker Compose</li>
+                    <li>Git / GitHub</li>
+                    <li>Azure DevOps</li>
+                    <li>CI/CD Pipeline</li>
+                    <li>Linux (Ubuntu)</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deneyim (Experience) -->
+    <section class="cv-section">
+        <h2 class="cv-section-title">💼 Deneyim</h2>
+
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <h3 class="experience-company">TG Bilişim</h3>
+                    <p class="experience-role">Yazılım Geliştirici</p>
+                </div>
+                <div class="experience-period">2022 – Günümüz</div>
+            </div>
+            <ul class="experience-list">
+                <li>ASP.NET Core ve Blazor teknolojileri kullanılarak kurumsal web uygulamaları geliştirildi.</li>
+                <li>Mikroservis mimarisi ile ölçeklenebilir backend sistemleri tasarlandı ve hayata geçirildi.</li>
+                <li>Entity Framework Core ile veritabanı yönetimi ve optimizasyonu yapıldı.</li>
+                <li>Azure DevOps üzerinde CI/CD pipeline'ları kuruldu ve yönetildi.</li>
+                <li>Docker ile uygulama konteynerizasyonu gerçekleştirildi.</li>
+                <li class="highlight-ai">Azure OpenAI ve Semantic Kernel kullanılarak kurumsal AI agent çözümleri geliştirildi.</li>
+                <li class="highlight-ai">Microsoft Copilot Studio ile şirkete özel AI asistanlar tasarlandı ve entegre edildi.</li>
+                <li class="highlight-ai">RAG (Retrieval-Augmented Generation) mimarisi ile şirket içi belge sorgulama ajanları oluşturuldu.</li>
+                <li class="highlight-ai">LLM tabanlı iş akışları (agentic workflows) ile tekrar eden süreçler otomatize edildi.</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <h3 class="experience-company">Freelance</h3>
+                    <p class="experience-role">Yazılım Geliştirici</p>
+                </div>
+                <div class="experience-period">2020 – 2022</div>
+            </div>
+            <ul class="experience-list">
+                <li>.NET tabanlı masaüstü ve web uygulamaları geliştirildi.</li>
+                <li>Müşteri ihtiyaçlarına yönelik özel yazılım çözümleri üretildi.</li>
+                <li>Veritabanı tasarımı ve yönetimi gerçekleştirildi.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Projeler (Projects) -->
+    <section class="cv-section">
+        <h2 class="cv-section-title">🚀 Projeler</h2>
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <h3 class="experience-company">kebab.games</h3>
+                    <p class="experience-role">Kişisel Proje</p>
+                </div>
+                <div class="experience-period">2024 – Günümüz</div>
+            </div>
+            <ul class="experience-list">
+                <li>Blazor WebAssembly ile geliştirilmiş eğlenceli oyun platformu.</li>
+                <li>Yılan, Tetris, Mayın Tarlası, Sudoku, Renk Sıralama ve Kebab Hunters oyunlarını içerir.</li>
+                <li>Docker ile konteynerizasyon ve Nginx ile servis edilmektedir.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Eğitim (Education) -->
+    <section class="cv-section">
+        <h2 class="cv-section-title">🎓 Eğitim</h2>
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <h3 class="experience-company">Bilgisayar Mühendisliği</h3>
+                    <p class="experience-role">Lisans</p>
+                </div>
+                <div class="experience-period">2016 – 2020</div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@code {
+    private async Task PrintCV()
+    {
+        await JS.InvokeVoidAsync("window.print");
+    }
+}
